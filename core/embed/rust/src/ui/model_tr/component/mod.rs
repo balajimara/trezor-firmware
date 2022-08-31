@@ -54,7 +54,7 @@ pub use homescreen::{Homescreen, Lockscreen};
 pub use input_methods::{
     number_input::NumberInput,
     passphrase::PassphraseEntry,
-    pin::PinEntry,
+    pin::{PinEntry, PinKeyboard, PinKeyboardMsg},
     simple_choice::SimpleChoice,
     wordlist::{WordlistEntry, WordlistType},
 };

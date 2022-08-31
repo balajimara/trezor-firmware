@@ -375,6 +375,8 @@ SOURCE_UNIX = [
     'embed/trezorhal/unix/rng.c',
     'embed/trezorhal/unix/usb.c',
     'embed/trezorhal/unix/touch/touch.c',
+    'embed/trezorhal/unix/screenshot.c',
+    'embed/unix/alloc_only.c',
     'embed/unix/main.c',
     'embed/unix/main_main.c',
     'embed/unix/profile.c',
@@ -752,7 +754,7 @@ RUST_LIBPATH = f'{RUST_LIBDIR}/lib{RUST_LIB}.a'
 def cargo_build():
     # T1 does not have its own Rust feature, it shares it with TR
     model_feature = 'model_tr' if TREZOR_MODEL == '1' else f'model_t{TREZOR_MODEL.lower()}'
-    features = ['micropython', 'protobuf', model_feature]
+    features = ['micropython', 'protobuf', 'emulator', model_feature]
     if BITCOIN_ONLY == '1':
         features.append('bitcoin_only')
     features.append('ui')

@@ -1,6 +1,7 @@
 use crate::ui::{
     component::{Child, Component, Event, EventCtx, Label, Pad},
     geometry::{Alignment2D, Rect},
+    layout::simplified::ReturnToC,
 };
 
 use super::{
@@ -9,7 +10,6 @@ use super::{
         theme::{BUTTON_HEIGHT, ICON_WARN_TITLE, TITLE_AREA_HEIGHT},
     },
     theme::{BLD_BG, BLD_FG, TEXT_NORMAL},
-    ReturnToC,
 };
 
 const LEFT_BUTTON_TEXT: &str = "INSTALL FW";

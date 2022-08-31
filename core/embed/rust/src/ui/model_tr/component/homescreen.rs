@@ -1,4 +1,5 @@
 use crate::{
+    micropython::buffer::StrBuffer,
     strutil::StringType,
     trezorhal::usb::usb_configured,
     ui::{
@@ -161,17 +162,17 @@ where
 
 pub struct Lockscreen<T>
 where
-    T: StringType,
+    T: AsRef<str>,
 {
     label: Child<Label<T>>,
-    instruction: Child<Label<T>>,
+    instruction: Child<Label<StrBuffer>>,
     /// Used for unlocking the device from lockscreen
-    invisible_buttons: Child<ButtonController<T>>,
+    invisible_buttons: Child<ButtonController<StrBuffer>>,
 }
 
 impl<T> Lockscreen<T>
 where
-    T: StringType + Clone,
+    T: AsRef<str>,
 {
     pub fn new(label: T, bootscreen: bool) -> Self {
         let invisible_btn_layout = ButtonLayout::text_none_text("".into(), "".into());
@@ -190,7 +191,7 @@ where
 
 impl<T> Component for Lockscreen<T>
 where
-    T: StringType + Clone,
+    T: AsRef<str>,
 {
     type Msg = ();
 
@@ -236,7 +237,7 @@ where
 #[cfg(feature = "ui_debug")]
 impl<T> crate::trace::Trace for Lockscreen<T>
 where
-    T: StringType,
+    T: AsRef<str>,
 {
     fn trace(&self, t: &mut dyn crate::trace::Tracer) {
         t.component("Lockscreen");

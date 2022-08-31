@@ -32,6 +32,7 @@ use crate::{
                 iter_into_array, iter_into_vec, upy_disable_animation, upy_toif_info, ConfirmBlob,
             },
         },
+        workflow::pin::{draw_empty_loader, remove_keepalive_callback, set_keepalive_callback},
     },
 };
 
@@ -235,7 +236,7 @@ where
 
 impl<T> ComponentMsgObj for Lockscreen<T>
 where
-    T: StringType + Clone,
+    T: AsRef<str>,
 {
     fn msg_try_into_obj(&self, _msg: Self::Msg) -> Result<Obj, Error> {
         Ok(CANCELLED.as_obj())
@@ -1503,10 +1504,9 @@ extern "C" fn new_show_lockscreen(n_args: usize, args: *const Obj, kwargs: *mut 
             .get(Qstr::MP_QSTR_label)?
             .try_into_option()?
             .unwrap_or_else(|| constant::MODEL_NAME.into());
-        let bootscreen: bool = kwargs.get(Qstr::MP_QSTR_bootscreen)?.try_into()?;
         let skip_first_paint: bool = kwargs.get(Qstr::MP_QSTR_skip_first_paint)?.try_into()?;
 
-        let obj = LayoutObj::new(Lockscreen::new(label, bootscreen))?;
+        let obj = LayoutObj::new(Lockscreen::new(label, false))?;
         if skip_first_paint {
             obj.skip_first_paint();
         }
@@ -1522,6 +1522,18 @@ extern "C" fn draw_welcome_screen() -> Obj {
     display::sync();
     screen.paint();
     Obj::const_none()
+}
+
+extern "C" fn render_empty_loader(n_args: usize, args: *const Obj, kwargs: *mut Map) -> Obj {
+    let block = move |_args: &[Obj], kwargs: &Map| {
+        let message: StrBuffer = kwargs.get(Qstr::MP_QSTR_message)?.try_into()?;
+        let description: StrBuffer = kwargs.get(Qstr::MP_QSTR_description)?.try_into()?;
+
+        draw_empty_loader(message, description);
+
+        Ok(Obj::const_none())
+    };
+    unsafe { util::try_with_args_and_kwargs(n_args, args, kwargs, block) }
 }
 
 #[no_mangle]
@@ -1905,7 +1917,6 @@ pub static mp_module_trezorui2: Module = obj_module! {
     /// def show_lockscreen(
     ///     *,
     ///     label: str | None,
-    ///     bootscreen: bool,
     ///     skip_first_paint: bool,
     /// ) -> CANCELLED:
     ///     """Homescreen for locked device."""
@@ -1914,4 +1925,18 @@ pub static mp_module_trezorui2: Module = obj_module! {
     /// def draw_welcome_screen() -> None:
     ///     """Show logo icon with the model name at the bottom and return."""
     Qstr::MP_QSTR_draw_welcome_screen => obj_fn_0!(draw_welcome_screen).as_obj(),
+
+    /// def set_keepalive_callback(
+    ///     callback: KeepaliveCallback,
+    /// ) -> None:
+    ///    """Sets keepalive callback. """
+    Qstr::MP_QSTR_set_keepalive_callback => obj_fn_1!(set_keepalive_callback).as_obj(),
+
+    /// def remove_keepalive_callback() -> None:
+    ///    """Removes keepalive callback. """
+    Qstr::MP_QSTR_remove_keepalive_callback => obj_fn_0!(remove_keepalive_callback).as_obj(),
+
+    /// def render_empty_loader(message:  str, description: str) -> None:
+    ///    """Renders empty loader."""
+    Qstr::MP_QSTR_render_empty_loader => obj_fn_kw!(0, render_empty_loader).as_obj(),
 };

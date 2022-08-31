@@ -6,12 +6,12 @@ use crate::ui::{
     display,
     display::{Font, Icon},
     geometry::{Alignment2D, Offset, Point, Rect},
+    layout::simplified::ReturnToC,
 };
 
 use super::{
     super::component::{Choice, ChoiceFactory, ChoicePage},
     theme::{BLD_BG, BLD_FG, ICON_EXIT, ICON_REDO, ICON_TRASH},
-    ReturnToC,
 };
 
 #[repr(u32)]

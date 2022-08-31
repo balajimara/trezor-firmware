@@ -2,6 +2,7 @@ use crate::ui::{
     component::{Child, Component, ComponentExt, Event, EventCtx, Label, Pad},
     display::{self, Color, Font},
     geometry::{Point, Rect},
+    layout::simplified::ReturnToC,
 };
 
 use super::{
@@ -10,7 +11,6 @@ use super::{
         theme::{BUTTON_HEIGHT, TITLE_AREA_HEIGHT},
     },
     theme::WHITE,
-    ReturnToC,
 };
 
 const ALERT_AREA_START: i16 = 39;

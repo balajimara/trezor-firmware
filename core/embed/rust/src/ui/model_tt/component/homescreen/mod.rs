@@ -14,7 +14,13 @@ use crate::{
 };
 
 use crate::{
-    trezorhal::{buffers::BufferJpegWork, display::ToifFormat, uzlib::UZLIB_WINDOW_SIZE},
+    storage::{get_avatar_len, load_avatar},
+    trezorhal::{
+        alloc::{alloc_only, alloc_only_init},
+        buffers::BufferJpegWork,
+        display::ToifFormat,
+        uzlib::UZLIB_WINDOW_SIZE,
+    },
     ui::{
         constant::HEIGHT,
         display::{tjpgd::BufferInput, toif::Toif},
@@ -272,6 +278,34 @@ impl<T> Lockscreen<T> {
     pub fn new(label: T, bootscreen: bool) -> Self {
         Lockscreen { label, bootscreen }
     }
+
+    pub fn paint_lockscreen(&self, data: Result<&[u8], ()>, texts: &[HomescreenText; 3]) {
+        let mut show_default = true;
+
+        if let Ok(data) = data {
+            if is_image_jpeg(data) {
+                let mut input = BufferInput(data);
+                let mut pool = BufferJpegWork::get_cleared();
+                let mut hs_img = HomescreenJpeg::new(&mut input, pool.buffer.as_mut_slice());
+                homescreen_blurred(&mut hs_img, texts);
+                show_default = false;
+            } else if is_image_toif(data) {
+                let input = unwrap!(Toif::new(data));
+                let mut window = [0; UZLIB_WINDOW_SIZE];
+                let mut hs_img =
+                    HomescreenToif::new(input.decompression_context(Some(&mut window)));
+                homescreen_blurred(&mut hs_img, texts);
+                show_default = false;
+            }
+        }
+
+        if show_default {
+            let mut input = BufferInput(IMAGE_HOMESCREEN);
+            let mut pool = BufferJpegWork::get_cleared();
+            let mut hs_img = HomescreenJpeg::new(&mut input, pool.buffer.as_mut_slice());
+            homescreen_blurred(&mut hs_img, texts);
+        }
+    }
 }
 
 impl<T> Component for Lockscreen<T>
@@ -322,32 +356,17 @@ where
             },
         ];
 
-        let res = get_user_custom_image();
-        let mut show_default = true;
-
-        if let Ok(data) = res {
-            if is_image_jpeg(data.as_ref()) {
-                let mut input = BufferInput(data.as_ref());
-                let mut pool = BufferJpegWork::get_cleared();
-                let mut hs_img = HomescreenJpeg::new(&mut input, pool.buffer.as_mut_slice());
-                homescreen_blurred(&mut hs_img, &texts);
-                show_default = false;
-            } else if is_image_toif(data.as_ref()) {
-                let input = unwrap!(Toif::new(data.as_ref()));
-                let mut window = [0; UZLIB_WINDOW_SIZE];
-                let mut hs_img =
-                    HomescreenToif::new(input.decompression_context(Some(&mut window)));
-                homescreen_blurred(&mut hs_img, &texts);
-                show_default = false;
+        if self.bootscreen {
+            let res = get_image_no_mpy();
+            self.paint_lockscreen(res, &texts);
+        } else {
+            let res = get_user_custom_image();
+            if res.is_ok() {
+                self.paint_lockscreen(Ok(unwrap!(res).as_ref()), &texts);
+            } else {
+                self.paint_lockscreen(Err(()), &texts);
             }
-        }
-
-        if show_default {
-            let mut input = BufferInput(IMAGE_HOMESCREEN);
-            let mut pool = BufferJpegWork::get_cleared();
-            let mut hs_img = HomescreenJpeg::new(&mut input, pool.buffer.as_mut_slice());
-            homescreen_blurred(&mut hs_img, &texts);
-        }
+        };
     }
 }
 
@@ -373,6 +392,17 @@ fn is_image_toif(buffer: &[u8]) -> bool {
         }
     }
     false
+}
+
+fn get_image_no_mpy() -> Result<&'static [u8], ()> {
+    if let Ok(len) = get_avatar_len() {
+        alloc_only_init(true);
+        let buf = alloc_only(len);
+        if load_avatar(buf).is_ok() {
+            return Ok(buf);
+        }
+    };
+    Err(())
 }
 
 #[cfg(feature = "ui_debug")]

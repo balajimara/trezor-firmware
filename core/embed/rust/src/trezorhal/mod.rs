@@ -1,3 +1,4 @@
+pub mod alloc;
 pub mod bip39;
 #[macro_use]
 #[allow(unused_macros)]
@@ -18,8 +19,16 @@ pub mod uzlib;
 pub mod wordlist;
 
 pub mod buffers;
+#[cfg(feature = "sd_card")]
+pub mod fatfs;
+pub mod hmac;
+#[cfg(feature = "sd_card")]
+pub mod sdcard;
 #[cfg(not(feature = "micropython"))]
 pub mod time;
 
 #[cfg(feature = "micropython")]
 pub use crate::micropython::time;
+
+#[cfg(all(feature = "ui_debug", feature = "emulator"))]
+pub mod screenshot;

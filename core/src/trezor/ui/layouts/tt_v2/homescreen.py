@@ -91,27 +91,17 @@ class Lockscreen(HomescreenBase):
     def __init__(
         self,
         label: str | None,
-        bootscreen: bool = False,
     ) -> None:
-        self.bootscreen = bootscreen
-        if bootscreen:
-            self.BACKLIGHT_LEVEL = ui.BACKLIGHT_NORMAL
-
-        skip = (
-            not bootscreen and storage_cache.homescreen_shown is self.RENDER_INDICATOR
-        )
+        skip = storage_cache.homescreen_shown is self.RENDER_INDICATOR
         super().__init__(
             layout=trezorui2.show_lockscreen(
                 label=label or "My Trezor",
-                bootscreen=bootscreen,
                 skip_first_paint=skip,
             ),
         )
 
     async def __iter__(self) -> Any:
         result = await super().__iter__()
-        if self.bootscreen:
-            self.request_complete_repaint()
         return result
 
 

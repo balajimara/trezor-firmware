@@ -79,6 +79,27 @@ def reboot_to_bootloader() -> None:
     """
     Reboots to bootloader.
     """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def screenshot() -> bool:
+    """
+    Takes a screenshot and saves it
+    """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def screenshot_clear() -> None:
+    """
+    Clears C buffers
+    """
+
+
+# extmod/modtrezorutils/modtrezorutils.c
+def screenshot_prepare(refresh_index: int, msg: str) -> None:
+    """
+    Prepares screenshot
+    """
 SCM_REVISION: bytes
 VERSION_MAJOR: int
 VERSION_MINOR: int

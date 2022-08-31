@@ -37,14 +37,6 @@ typedef enum {
   TOIF_GRAYSCALE_EH = 3,   // even hi
 } toif_format_t;
 
-// provided by port
-
-void display_init(void);
-void display_init_seq(void);
-void display_refresh(void);
-const char *display_save(const char *prefix);
-void display_clear_save(void);
-
 // provided by common
 
 void display_clear(void);

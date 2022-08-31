@@ -1323,3 +1323,15 @@ async def confirm_set_new_pin(
         "CONTINUE",
         br_code,
     )
+
+
+def set_keepalive_callback(callback):
+    trezorui2.set_keepalive_callback(callback)
+
+
+def remove_keepalive_callback():
+    trezorui2.remove_keepalive_callback()
+
+
+def render_empty_loader(msg: str, description: str):
+    trezorui2.render_empty_loader(message=msg, description=description)

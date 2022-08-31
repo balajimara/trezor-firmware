@@ -32,12 +32,24 @@ use crate::{
 };
 
 // Reexports
+
+#[cfg(all(feature = "ui_debug", feature = "emulator"))]
+use crate::trezorhal::screenshot::screenshot;
+
 pub use crate::ui::display::toif::Icon;
 pub use color::Color;
 pub use font::{Font, Glyph, GlyphMetrics};
 pub use loader::{
     loader, loader_indeterminate, loader_small_indeterminate, LOADER_MAX, LOADER_MIN,
 };
+
+pub fn orientation() -> i32 {
+    display::orientation(-1)
+}
+
+pub fn set_orientation(degrees: i32) {
+    display::orientation(degrees);
+}
 
 pub fn backlight() -> u16 {
     display::backlight(-1) as u16
@@ -942,6 +954,8 @@ pub fn sync() {
 }
 
 pub fn refresh() {
+    #[cfg(all(feature = "ui_debug", feature = "emulator"))]
+    screenshot();
     display::refresh();
 }
 

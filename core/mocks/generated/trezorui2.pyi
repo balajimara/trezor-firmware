@@ -411,7 +411,6 @@ def show_homescreen(
 def show_lockscreen(
     *,
     label: str | None,
-    bootscreen: bool,
     skip_first_paint: bool,
 ) -> CANCELLED:
     """Homescreen for locked device."""
@@ -420,6 +419,23 @@ def show_lockscreen(
 # rust/src/ui/model_tr/layout.rs
 def draw_welcome_screen() -> None:
     """Show logo icon with the model name at the bottom and return."""
+
+
+# rust/src/ui/model_tr/layout.rs
+def set_keepalive_callback(
+    callback: KeepaliveCallback,
+) -> None:
+   """Sets keepalive callback. """
+
+
+# rust/src/ui/model_tr/layout.rs
+def remove_keepalive_callback() -> None:
+   """Removes keepalive callback. """
+
+
+# rust/src/ui/model_tr/layout.rs
+def render_empty_loader(message:  str, description: str) -> None:
+   """Renders empty loader."""
 CONFIRMED: object
 CANCELLED: object
 INFO: object
@@ -855,7 +871,6 @@ def show_homescreen(
 def show_lockscreen(
     *,
     label: str | None,
-    bootscreen: bool,
     skip_first_paint: bool,
 ) -> CANCELLED:
     """Homescreen for locked device."""
@@ -864,3 +879,20 @@ def show_lockscreen(
 # rust/src/ui/model_tt/layout.rs
 def draw_welcome_screen() -> None:
     """Show logo icon with the model name at the bottom and return."""
+
+
+# rust/src/ui/model_tt/layout.rs
+def set_keepalive_callback(
+    callback: KeepaliveCallback,
+) -> None:
+   """Sets keepalive callback. """
+
+
+# rust/src/ui/model_tt/layout.rs
+def remove_keepalive_callback() -> None:
+   """Removes keepalive callback. """
+
+
+# rust/src/ui/model_tt/layout.rs
+def render_empty_loader(message:  str, description: str) -> None:
+   """Renders empty loader."""

@@ -23,6 +23,7 @@
 #include "supervise.h"
 #endif
 
+#include "screenshot.h"
 #include "version.h"
 
 #if MICROPY_PY_TREZORUTILS
@@ -257,6 +258,48 @@ STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_reboot_to_bootloader_obj,
 STATIC mp_obj_str_t mod_trezorutils_revision_obj = {
     {&mp_type_bytes}, 0, sizeof(SCM_REVISION) - 1, (const byte *)SCM_REVISION};
 
+#ifdef TREZOR_EMULATOR
+/// def screenshot() -> bool:
+///     """
+///     Takes a screenshot and saves it
+///     """
+STATIC mp_obj_t mod_trezorutils_screenshot() {
+  bool taken = screenshot();
+  if (taken) {
+    return mp_const_true;
+  }
+  return mp_const_false;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_screenshot_obj,
+                                 mod_trezorutils_screenshot);
+
+/// def screenshot_clear() -> None:
+///     """
+///     Clears C buffers
+///     """
+STATIC mp_obj_t mod_trezorutils_screenshot_clear() {
+  screenshot_clear();
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_0(mod_trezorutils_screenshot_clear_obj,
+                                 mod_trezorutils_screenshot_clear);
+
+/// def screenshot_prepare(refresh_index: int, msg: str) -> None:
+///     """
+///     Prepares screenshot
+///     """
+STATIC mp_obj_t mod_trezorutils_screenshot_prepare(mp_obj_t refresh_index,
+                                                   mp_obj_t msg) {
+  mp_buffer_info_t msgbuf = {0};
+  uint32_t idx = trezor_obj_get_uint(refresh_index);
+  mp_get_buffer(msg, &msgbuf, MP_BUFFER_READ);
+  screenshot_prepare(idx, msgbuf.buf);
+  return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_2(mod_trezorutils_screenshot_prepare_obj,
+                                 mod_trezorutils_screenshot_prepare);
+#endif
+
 /// SCM_REVISION: bytes
 /// VERSION_MAJOR: int
 /// VERSION_MINOR: int
@@ -273,6 +316,14 @@ STATIC const mp_rom_map_elem_t mp_module_trezorutils_globals_table[] = {
     {MP_ROM_QSTR(MP_QSTR_consteq), MP_ROM_PTR(&mod_trezorutils_consteq_obj)},
     {MP_ROM_QSTR(MP_QSTR_memcpy), MP_ROM_PTR(&mod_trezorutils_memcpy_obj)},
     {MP_ROM_QSTR(MP_QSTR_halt), MP_ROM_PTR(&mod_trezorutils_halt_obj)},
+#ifdef TREZOR_EMULATOR
+    {MP_ROM_QSTR(MP_QSTR_screenshot),
+     MP_ROM_PTR(&mod_trezorutils_screenshot_obj)},
+    {MP_ROM_QSTR(MP_QSTR_screenshot_clear),
+     MP_ROM_PTR(&mod_trezorutils_screenshot_clear_obj)},
+    {MP_ROM_QSTR(MP_QSTR_screenshot_prepare),
+     MP_ROM_PTR(&mod_trezorutils_screenshot_prepare_obj)},
+#endif
     {MP_ROM_QSTR(MP_QSTR_firmware_hash),
      MP_ROM_PTR(&mod_trezorutils_firmware_hash_obj)},
     {MP_ROM_QSTR(MP_QSTR_firmware_vendor),

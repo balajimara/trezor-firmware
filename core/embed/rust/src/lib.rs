@@ -22,6 +22,9 @@ mod maybe_trace;
 mod micropython;
 #[cfg(feature = "protobuf")]
 mod protobuf;
+#[cfg(feature = "sd_card")]
+mod sdsalt;
+#[cfg(feature = "micropython")]
 mod storage;
 mod time;
 #[cfg(feature = "ui_debug")]
