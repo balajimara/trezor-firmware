@@ -130,17 +130,11 @@ def _compress(data: bytes) -> bytes:
 
 def embed_binary(obj_program, env, section, target, file):
     file_path = PROJECT_ROOT / Path(file)
-
-    with open(file_path, "rb") as f:
-        data = f.read()
-        compressed = _compress(data)
-
-    _in = "build/compressed_bin.zip"
-
+    _in = "build/firmware/compressed_bin.zip"
     compressed_fp = PROJECT_ROOT / Path(_in)
 
-    with open(compressed_fp, "wb") as f:
-        f.write(compressed)
+    compressed = _compress(file_path.read_bytes())
+    compressed_fp.write_bytes(compressed)
 
     start_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_start"
     end_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_end"

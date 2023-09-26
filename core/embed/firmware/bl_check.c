@@ -112,6 +112,7 @@ static secbool latest_bootloader(const uint8_t *hash, int len) {
 
 #define UZLIB_WINDOW_SIZE (1 << 10)
 
+#if PRODUCTION || BOOTLOADER_QA
 static void uzlib_prepare(struct uzlib_uncomp *decomp, uint8_t *window,
                           const void *src, uint32_t srcsize, void *dest,
                           uint32_t destsize) {
@@ -126,6 +127,7 @@ static void uzlib_prepare(struct uzlib_uncomp *decomp, uint8_t *window,
   decomp->dest_limit = decomp->dest + destsize;
   uzlib_uncompress_init(decomp, window, window ? UZLIB_WINDOW_SIZE : 0);
 }
+#endif
 
 void check_and_replace_bootloader(void) {
 #if PRODUCTION || BOOTLOADER_QA
