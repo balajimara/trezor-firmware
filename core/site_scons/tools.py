@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import zlib
 from pathlib import Path
 
 from boards import (
@@ -120,3 +121,43 @@ def get_defs_for_cmake(defs: list[str | tuple[str, str]]) -> list[str]:
         else:
             result.append(d)
     return result
+
+
+def _compress(data: bytes) -> bytes:
+    z = zlib.compressobj(level=9, wbits=-10)
+    return z.compress(data) + z.flush()
+
+
+def embed_binary(obj_program, env, section, target, file):
+    file_path = PROJECT_ROOT / Path(file)
+
+    with open(file_path, "rb") as f:
+        data = f.read()
+        compressed = _compress(data)
+
+    _in = "build/compressed_bin.zip"
+
+    compressed_fp = PROJECT_ROOT / Path(_in)
+
+    with open(compressed_fp, "wb") as f:
+        f.write(compressed)
+
+    start_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_start"
+    end_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_end"
+    size_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_size"
+    start_dest = target.replace("/", "_").replace(".o", "_bin") + "_start"
+    end_dest = target.replace("/", "_").replace(".o", "_bin") + "_end"
+    size_dest = target.replace("/", "_").replace(".o", "_bin") + "_size"
+
+    obj_program.extend(
+        env.Command(
+            target=target,
+            source=_in,
+            action="$OBJCOPY -I binary -O elf32-littlearm -B arm"
+            f" --rename-section .data=.{section}"
+            f" --redefine-sym {start_src}={start_dest}"
+            f" --redefine-sym {end_src}={end_dest}"
+            f" --redefine-sym {size_src}={size_dest}"
+            " $SOURCE $TARGET",
+        )
+    )
