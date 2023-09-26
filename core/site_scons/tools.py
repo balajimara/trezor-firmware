@@ -134,7 +134,9 @@ def embed_binary(obj_program, env, section, target, file):
     compressed_fp = PROJECT_ROOT / Path(_in)
 
     compressed = _compress(file_path.read_bytes())
-    compressed_fp.write_bytes(compressed)
+
+    with compressed_fp.open("wb") as f:
+        f.write(compressed)
 
     start_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_start"
     end_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_end"
