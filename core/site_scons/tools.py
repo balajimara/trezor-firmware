@@ -128,26 +128,31 @@ def _compress(data: bytes) -> bytes:
     return z.compress(data) + z.flush()
 
 
-def embed_binary(obj_program, env, section, target, file):
-    file_path = PROJECT_ROOT / Path(file)
-    _in = "build/firmware/compressed_bin.zip"
-    compressed_fp = PROJECT_ROOT / Path(_in)
-
-    compressed = _compress(file_path.read_bytes())
-
-    with compressed_fp.open("wb") as f:
-        f.write(compressed)
-
+def embed_binary(obj_program, env, section, target_, file):
+    _in = f'embedded_{section}.zip'
     start_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_start"
     end_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_end"
     size_src = "_binary_" + _in.replace("/", "_").replace(".", "_") + "_size"
-    start_dest = target.replace("/", "_").replace(".o", "_bin") + "_start"
-    end_dest = target.replace("/", "_").replace(".o", "_bin") + "_end"
-    size_dest = target.replace("/", "_").replace(".o", "_bin") + "_size"
+    start_dest = target_.replace("/", "_").replace(".o", "_bin") + "_start"
+    end_dest = target_.replace("/", "_").replace(".o", "_bin") + "_end"
+    size_dest = target_.replace("/", "_").replace(".o", "_bin") + "_size"
+
+    def compress_action(target, source, env):
+        srcf = Path(str(source[0]))
+        dstf = Path(str(target[0]))
+        compressed = _compress(srcf.read_bytes())
+        dstf.write_bytes(compressed)
+        return 0
+
+    compress = env.Command(
+        target=_in,
+        source=file,
+        action=compress_action
+    )
 
     obj_program.extend(
         env.Command(
-            target=target,
+            target=target_,
             source=_in,
             action="$OBJCOPY -I binary -O elf32-littlearm -B arm"
             f" --rename-section .data=.{section}"
@@ -157,3 +162,5 @@ def embed_binary(obj_program, env, section, target, file):
             " $SOURCE $TARGET",
         )
     )
+
+    env.Depends(obj_program, compress)
