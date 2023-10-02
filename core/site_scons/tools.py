@@ -130,9 +130,15 @@ def _compress(data: bytes) -> bytes:
 
 def embed_binary(obj_program, env, section, target_, file):
     _in = f"embedded_{section}.zip"
-    start_src = "_binary_build_firmware_" + _in.replace("/", "_").replace(".", "_") + "_start"
-    end_src = "_binary_build_firmware_" + _in.replace("/", "_").replace(".", "_") + "_end"
-    size_src = "_binary_build_firmware_" + _in.replace("/", "_").replace(".", "_") + "_size"
+    start_src = (
+        "_binary_build_firmware_" + _in.replace("/", "_").replace(".", "_") + "_start"
+    )
+    end_src = (
+        "_binary_build_firmware_" + _in.replace("/", "_").replace(".", "_") + "_end"
+    )
+    size_src = (
+        "_binary_build_firmware_" + _in.replace("/", "_").replace(".", "_") + "_size"
+    )
     start_dest = "_binary_" + target_.replace("/", "_").replace(".o", "_zip") + "_start"
     end_dest = "_binary_" + target_.replace("/", "_").replace(".o", "_zip") + "_end"
     size_dest = "_binary_" + target_.replace("/", "_").replace(".o", "_zip") + "_size"

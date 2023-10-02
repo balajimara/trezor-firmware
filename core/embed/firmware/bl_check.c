@@ -149,7 +149,8 @@ void check_and_replace_bootloader(void) {
 
   // replace bootloader with the latest one
   const uint32_t *data =
-      (const uint32_t *)&_binary_embed_firmware_bootloaders_bootloader_zip_start;
+      (const uint32_t
+           *)&_binary_embed_firmware_bootloaders_bootloader_zip_start;
   const uint32_t len =
       (const uint32_t)&_binary_embed_firmware_bootloaders_bootloader_zip_size;
 
