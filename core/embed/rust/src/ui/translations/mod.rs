@@ -126,8 +126,7 @@ fn translate(key: &str) -> Option<&'static str> {
 
 /// Quickly checks whether there are some valid translations data
 fn are_there_translations() -> bool {
-    let first_byte_buffer: &'static [u8] = translations_get(0, 1).unwrap_or(&[]);
-    first_byte_buffer[0] != TERMINATE_BYTE
+    translations_get()[0] != TERMINATE_BYTE
 }
 
 /// Loops through all the translations data in flash and
@@ -150,7 +149,7 @@ fn get_translation_by_index(index: usize, chunk_len: u32, max_offset: u32) -> Op
             len = max_offset - offset;
         }
 
-        let data_buffer: &'static [u8] = translations_get(offset, len).unwrap_or(&[]);
+        let data_buffer = translations_get();
         offset += len;
 
         for (i, &byte) in data_buffer.iter().enumerate() {

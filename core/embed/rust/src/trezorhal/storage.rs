@@ -241,14 +241,13 @@ pub fn delete(appkey: u16) -> StorageResult<()> {
     }
 }
 
-pub fn translations_get(offset: u32, len: u32) -> StorageResult<&'static [u8]> {
-    let ptr = unsafe { ffi::translations_read(offset, len) };
+pub fn translations_get() -> &'static [u8] {
+    let mut len: u32;
+    let ptr = unsafe { ffi::translations_read(&mut len) };
     if ptr.is_null() {
-        Err(StorageError::ReadFailed)
-    } else {
-        let slice = unsafe { core::slice::from_raw_parts(ptr, len as usize) };
-        Ok(slice)
+        fatal_error!("Translations read failed");
     }
+    unsafe { core::slice::from_raw_parts(ptr, len as usize) }
 }
 
 #[cfg(test)]

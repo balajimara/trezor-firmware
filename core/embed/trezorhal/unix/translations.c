@@ -13,8 +13,10 @@ void translations_write(uint8_t* data, uint32_t offset, uint32_t len) {
   ensure(flash_lock_write(), "translations_write lock");
 }
 
-const uint8_t* translations_read(uint32_t offset, uint32_t len) {
-  return flash_area_get_address(&TRANSLATIONS_AREA, offset, len);
+const uint8_t* translations_read(uint32_t *len) {
+  __Static_assert(TRANSLATIONS_AREA->num_subareas == 1);
+  *len = flash_area_get_size(&TRANSLATIONS_AREA);
+  return flash_area_get_address(&TRANSLATIONS_AREA, 0, 0);
 }
 
 void translations_erase(void) {
