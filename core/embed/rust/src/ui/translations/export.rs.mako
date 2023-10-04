@@ -23,7 +23,7 @@ en_keys = get_all_json_keys(en_data)
 %>\
 use crate::micropython::{map::Map, module::Module, qstr::Qstr};
 
-use super::{language_name_obj, translate_obj};
+use super::{language_name_obj, translate_obj, TR_OBJ};
 
 #[no_mangle]
 #[rustfmt::skip]
@@ -34,6 +34,10 @@ pub static mp_module_trezortranslate: Module = obj_module! {
     /// def language_name() -> str:
     ///     """Get the name of the current language."""
     Qstr::MP_QSTR_language_name => obj_fn_0!(language_name_obj).as_obj(),
+
+    /// TR: module
+    /// """Translation module with attributes."
+    Qstr::MP_QSTR_TR => TR_OBJ.as_obj(),
 
     /// def tr(key: Literal[
 % for name in sorted(en_keys):

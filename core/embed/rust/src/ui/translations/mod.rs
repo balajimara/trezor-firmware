@@ -8,7 +8,11 @@ use general::LANGUAGE_INDEX;
 
 #[cfg(feature = "micropython")]
 use crate::micropython::{buffer::StrBuffer, obj::Obj, util};
-use crate::trezorhal::storage::translations_get;
+use crate::{
+    error::Error,
+    micropython::{ffi, obj::ObjBase, qstr::Qstr, typ::Type},
+    trezorhal::storage::translations_get,
+};
 
 use core::str;
 
@@ -18,6 +22,56 @@ const TERMINATE_BYTE: u8 = 0xFF;
 
 const CHUNK_LEN: u32 = 1024;
 const MAX_OFFSET: u32 = 32 * 1024;
+
+extern "C" fn translate_attr_fn(_self_in: Obj, attr: ffi::qstr, dest: *mut Obj) {
+    let block = || {
+        let arg = unsafe { dest.read() };
+        if !arg.is_null() {
+            // Null destination would mean a `setattr`.
+            return Err(Error::TypeError);
+        }
+        let attr = Qstr::from_u16(attr as u16);
+        unsafe { dest.write(TR_OBJ.getattr(attr)?) };
+        Ok(())
+    };
+    unsafe { util::try_or_raise(block) }
+}
+
+#[repr(C)]
+pub struct TrObj {
+    base: ObjBase,
+}
+
+static TR_TYPE: Type = obj_type! {
+    name: Qstr::MP_QSTR_TR,
+    attr_fn: translate_attr_fn,
+};
+
+// SAFETY: We are in a single-threaded environment.
+unsafe impl Sync for TrObj {}
+
+impl TrObj {
+    fn obj_type() -> &'static Type {
+        &TR_TYPE
+    }
+
+    fn getattr(&self, attr: Qstr) -> Result<Obj, Error> {
+        tr(attr.as_str()).try_into()
+    }
+
+    /// Convert TrObj to a MicroPython object
+    const fn as_obj(&'static self) -> Obj {
+        // SAFETY:
+        //  - We are an object struct with a base and a type.
+        //  - 'static lifetime holds us in place.
+        //  - There's nothing to mutate.
+        unsafe { Obj::from_ptr(self as *const _ as *mut _) }
+    }
+}
+
+pub static TR_OBJ: TrObj = TrObj {
+    base: TR_TYPE.as_base(),
+};
 
 /// Translation function callable from micropython.
 #[cfg(feature = "micropython")]
