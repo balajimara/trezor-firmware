@@ -128,13 +128,9 @@ where
         self.swipe.allow_right = self.swipe_right;
     }
 
-    fn page_change(&mut self, ctx: &mut EventCtx, is_next: bool) {
+    fn change_page(&mut self, ctx: &mut EventCtx, step: isize) {
         // Advance scrollbar.
-        if is_next {
-            self.scrollbar.go_to_next_page()
-        } else {
-            self.scrollbar.go_to_previous_page()
-        }
+        self.scrollbar.go_to_relative(step);
 
         // Adjust the swipe parameters according to the scrollbar.
         self.setup_swipe();
@@ -175,11 +171,11 @@ where
             match swipe {
                 SwipeDirection::Up => {
                     // Scroll down, if possible.
-                    return HandleResult::PageChange(true);
+                    return HandleResult::NextPage;
                 }
                 SwipeDirection::Down => {
                     // Scroll up, if possible.
-                    return HandleResult::PageChange(false);
+                    return HandleResult::PrevPage;
                 }
                 SwipeDirection::Left if self.swipe_left => {
                     return HandleResult::Return(PageMsg::SwipeLeft);
@@ -203,7 +199,7 @@ where
     ) -> HandleResult<(Option<<Self as Component>::Msg>, Option<ButtonMsg>)> {
         if self.scrollbar.has_next_page() {
             if let Some(ButtonMsg::Clicked) = self.button_next.event(ctx, event) {
-                return HandleResult::PageChange(true);
+                return HandleResult::NextPage;
             }
         } else {
             let result = self.button_confirm.event(ctx, event);
@@ -220,7 +216,7 @@ where
                 return HandleResult::Return((Some(PageMsg::Cancelled), None));
             }
         } else if let Some(ButtonMsg::Clicked) = self.button_prev.event(ctx, event) {
-            return HandleResult::PageChange(false);
+            return HandleResult::PrevPage;
         }
 
         HandleResult::Continue
@@ -272,7 +268,8 @@ where
 
 enum HandleResult<T> {
     Return(T),
-    PageChange(bool),
+    PrevPage,
+    NextPage,
     Continue,
 }
 
@@ -334,8 +331,12 @@ where
 
         match self.handle_swipe(ctx, event) {
             HandleResult::Return(r) => return Some(r),
-            HandleResult::PageChange(is_next) => {
-                self.page_change(ctx, is_next);
+            HandleResult::PrevPage => {
+                self.change_page(ctx, -1);
+                return None;
+            }
+            HandleResult::NextPage => {
+                self.change_page(ctx, 1);
                 return None;
             }
             HandleResult::Continue => {}
@@ -354,8 +355,12 @@ where
                 button_result = r;
                 confirm_button_msg = m;
             }
-            HandleResult::PageChange(is_next) => {
-                self.page_change(ctx, is_next);
+            HandleResult::PrevPage => {
+                self.change_page(ctx, -1);
+                return None;
+            }
+            HandleResult::NextPage => {
+                self.change_page(ctx, 1);
                 return None;
             }
             HandleResult::Continue => {}
@@ -364,8 +369,8 @@ where
         if self.loader.is_some() {
             return match self.handle_hold(ctx, event, &confirm_button_msg) {
                 HandleResult::Return(r) => Some(r),
-                HandleResult::PageChange(_) => unreachable!(),
                 HandleResult::Continue => None,
+                _ => unreachable!(),
             };
         }
         button_result

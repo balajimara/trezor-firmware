@@ -69,7 +69,9 @@ where
         }
     }
 
-    fn on_page_change(&mut self, ctx: &mut EventCtx) {
+    fn change_page(&mut self, ctx: &mut EventCtx, step: isize) {
+        // Advance scrollbar.
+        self.scrollbar.go_to_relative(step);
         // Adjust the swipe parameters according to the scrollbar.
         self.setup_swipe();
 
@@ -133,8 +135,7 @@ where
         if let Some(swipe) = self.swipe.event(ctx, event) {
             match (swipe, self.axis) {
                 (SwipeDirection::Left, Axis::Horizontal) | (SwipeDirection::Up, Axis::Vertical) => {
-                    self.scrollbar.go_to_next_page();
-                    self.on_page_change(ctx);
+                    self.change_page(ctx, 1);
                     return None;
                 }
                 (SwipeDirection::Right, _)
@@ -144,8 +145,7 @@ where
                 }
                 (SwipeDirection::Right, Axis::Horizontal)
                 | (SwipeDirection::Down, Axis::Vertical) => {
-                    self.scrollbar.go_to_previous_page();
-                    self.on_page_change(ctx);
+                    self.change_page(ctx, -1);
                     return None;
                 }
                 _ => {
