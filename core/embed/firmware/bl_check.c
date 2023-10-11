@@ -156,7 +156,7 @@ void check_and_replace_bootloader(void) {
 
   struct uzlib_uncomp decomp = {0};
   uint8_t decomp_window[UZLIB_WINDOW_SIZE] = {0};
-  uint8_t decomp_out[IMAGE_HEADER_SIZE] = {0};
+  uint32_t decomp_out[IMAGE_HEADER_SIZE / sizeof(uint32_t)] = {0};
 
   uzlib_prepare(&decomp, decomp_window, data, len, decomp_out,
                 sizeof(decomp_out));
@@ -207,30 +207,30 @@ void check_and_replace_bootloader(void) {
   ensure(flash_area_erase(&BOOTLOADER_AREA, NULL), NULL);
   ensure(flash_unlock_write(), NULL);
 
-  uint32_t j = 0;
-  uint32_t d_len = 0;
+  uint32_t offset = 0;
 
   do {
-    d_len = decomp.dest - decomp_out;
-    for (int i = 0; i < d_len / sizeof(uint32_t); i++) {
-      ensure(flash_area_write_word(&BOOTLOADER_AREA,
-                                   j * IMAGE_HEADER_SIZE + i * sizeof(uint32_t),
-                                   ((uint32_t *)decomp_out)[i]),
-             NULL);
+    uint32_t *p = decomp_out;
+    while ((uint32_t)p < (((uint32_t)decomp.dest) & ~3)) {
+      ensure(flash_area_write_word(&BOOTLOADER_AREA, offset, *p++), NULL);
+      offset += sizeof(uint32_t);
     }
-    decomp.dest = decomp_out;
-    j++;
+    if ((uint8_t *)p < decomp.dest) {
+      // last few bytes in case of unaligned data
+      uint32_t d = 0;
+      memcpy(&d, p, (uint32_t)decomp.dest - (uint32_t)p);
+      ensure(flash_area_write_word(&BOOTLOADER_AREA, offset, d), NULL);
+      offset += sizeof(uint32_t);
+    }
+    decomp.dest = (uint8_t *)decomp_out;
   } while (uzlib_uncompress(&decomp) >= 0);
 
-  // zero out the rest of the bootloader area
-  uint32_t start_zero = (j - 1) * IMAGE_HEADER_SIZE + d_len;
-
-  for (uint32_t i = start_zero / sizeof(uint32_t);
-       i < bl_len / sizeof(uint32_t); i++) {
-    ensure(flash_area_write_word(&BOOTLOADER_AREA, i * sizeof(uint32_t),
-                                 0x00000000),
-           NULL);
+  // fill the rest of the bootloader area with 0x00
+  while (offset < bl_len) {
+    ensure(flash_area_write_word(&BOOTLOADER_AREA, offset, 0x00000000), NULL);
+    offset += sizeof(uint32_t);
   }
+
   ensure(flash_lock_write(), NULL);
 #endif
 }
