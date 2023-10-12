@@ -29,8 +29,10 @@
 #include "uzlib.h"
 
 // symbols from bootloader.bin => bootloader.o
-extern const void _binary_embed_firmware_bootloaders_bootloader_bin_start;
-extern const void _binary_embed_firmware_bootloaders_bootloader_bin_size;
+extern const void
+    _binary_embed_firmware_bootloaders_bootloader_bin_deflated_start;
+extern const void
+    _binary_embed_firmware_bootloaders_bootloader_bin_deflated_size;
 
 /*
 static secbool known_bootloader(const uint8_t *hash, int len) {
@@ -150,9 +152,9 @@ void check_and_replace_bootloader(void) {
   // replace bootloader with the latest one
   const uint32_t *data =
       (const uint32_t
-           *)&_binary_embed_firmware_bootloaders_bootloader_bin_start;
+           *)&_binary_embed_firmware_bootloaders_bootloader_bin_deflated_start;
   const uint32_t len =
-      (const uint32_t)&_binary_embed_firmware_bootloaders_bootloader_bin_size;
+      (const uint32_t)&_binary_embed_firmware_bootloaders_bootloader_bin_deflated_size;
 
   struct uzlib_uncomp decomp = {0};
   uint8_t decomp_window[UZLIB_WINDOW_SIZE] = {0};
