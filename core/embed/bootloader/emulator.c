@@ -92,9 +92,6 @@ __attribute__((noreturn)) int main(int argc, char **argv) {
   uint8_t bitcoin_only = 0;
   while ((opt = getopt(argc, argv, "hslec:b:")) != -1) {
     switch (opt) {
-      case 'h':
-        usage();
-        exit(0);
       case 's':
         g_boot_command = BOOT_COMMAND_STOP_AND_WAIT;
         break;
