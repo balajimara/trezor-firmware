@@ -40,7 +40,7 @@ bool sector_is_empty(uint16_t sector) {
   return true;
 }
 
-void usage() {
+void usage(void) {
   printf("Usage: ./build/bootloader/bootloader_emu [options]\n");
   printf("Options:\n");
   printf("  -s  stay in bootloader\n");
@@ -50,6 +50,7 @@ void usage() {
 #ifdef USE_OPTIGA
   printf("  -l  lock bootloader\n");
 #endif
+  printf("  -h  show this help\n");
 }
 
 __attribute__((noreturn)) void display_error_and_die(const char *message,
@@ -65,7 +66,11 @@ __attribute__((noreturn)) void display_error_and_die(const char *message,
   display_backlight(180);
   screen_fatal_error_rust(title, message, footer);
   display_refresh();
-  printf("Click screen (TT) or press both buttons (TS3) to exit.\n");
+#if USE_TOUCH  
+  printf("Click screen to exit.\n");
+#elif USE_BUTTON
+  printf("Press both buttons to exit.\n");
+#endif
   ui_click();
   exit(0);
 }
@@ -85,8 +90,11 @@ __attribute__((noreturn)) int main(int argc, char **argv) {
   uint8_t set_variant = 0xff;
   uint8_t color_variant = 0;
   uint8_t bitcoin_only = 0;
-  while ((opt = getopt(argc, argv, "slec:b:")) != -1) {
+  while ((opt = getopt(argc, argv, "hslec:b:")) != -1) {
     switch (opt) {
+      case 'h':
+        usage();
+        exit(0);
       case 's':
         g_boot_command = BOOT_COMMAND_STOP_AND_WAIT;
         break;
@@ -108,7 +116,6 @@ __attribute__((noreturn)) int main(int argc, char **argv) {
         break;
 #endif
       default:
-        printf("Unrecognized argument or something\n");
         usage();
         exit(1);
     }
