@@ -4,12 +4,12 @@ use crate::ui::{
     display::Icon,
     geometry::{Alignment, Insets, Point, Rect},
     model_tt::{
-        bootloader::theme::{
+        component::{Button, ButtonMsg::Clicked},
+        constant::WIDTH,
+        theme::bootloader::{
             button_bld, button_bld_menu, BLD_BG, BUTTON_AREA_START, BUTTON_HEIGHT, CONTENT_PADDING,
             CORNER_BUTTON_AREA, MENU32, TEXT_NORMAL, TEXT_TITLE, TEXT_WARNING, TITLE_AREA,
         },
-        component::{Button, ButtonMsg::Clicked},
-        constant::WIDTH,
     },
 };
 

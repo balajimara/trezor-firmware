@@ -7,9 +7,8 @@ use crate::ui::{
 use super::{
     super::{
         component::{ButtonController, ButtonControllerMsg, ButtonLayout, ButtonPos},
-        theme::{BUTTON_HEIGHT, TITLE_AREA_HEIGHT},
+        theme::{BUTTON_HEIGHT, TITLE_AREA_HEIGHT, WHITE},
     },
-    theme::WHITE,
     ReturnToC,
 };
 

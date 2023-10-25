@@ -3,7 +3,7 @@ use crate::ui::{
     constant::screen,
     display::{self, Font},
     geometry::{Offset, Rect},
-    model_tt::bootloader::theme::{BLD_BG, BLD_TITLE_COLOR},
+    model_tt::theme::bootloader::{BLD_BG, BLD_TITLE_COLOR},
 };
 
 pub struct Connect {

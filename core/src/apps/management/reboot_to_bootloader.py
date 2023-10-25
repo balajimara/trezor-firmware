@@ -7,10 +7,12 @@ if TYPE_CHECKING:
 
 
 async def reboot_to_bootloader(msg: RebootToBootloader) -> NoReturn:
+    from ubinascii import hexlify
+
     from trezor import io, loop, utils, wire
     from trezor.enums import BootCommand
     from trezor.messages import Success
-    from trezor.ui.layouts import confirm_action
+    from trezor.ui.layouts import confirm_action, confirm_firmware_update
     from trezor.wire.context import get_context
 
     if msg.boot_command is None or msg.boot_command == BootCommand.STOP_AND_WAIT:
@@ -52,11 +54,9 @@ async def reboot_to_bootloader(msg: RebootToBootloader) -> NoReturn:
 
             version_str = ".".join(map(str, hdr["version"]))
 
-            await confirm_action(
-                "reboot",
-                "FIRMWARE UPDATE",
-                f"Install firmware updated? Firmware version {version_str} by {hdr['vendor']}",
-                verb="INSTALL",
+            await confirm_firmware_update(
+                description=f"Firmware version {version_str}\nby {hdr['vendor']}",
+                fingerprint=hexlify(hdr["fingerprint"]).decode(),
             )
 
             ctx = get_context()

@@ -6,12 +6,12 @@ use crate::{
         display::Icon,
         geometry::{Insets, Point, Rect},
         model_tt::{
-            bootloader::theme::{
+            component::{Button, ButtonMsg::Clicked, IconText},
+            theme::bootloader::{
                 button_bld, button_bld_menu, BLD_BG, BUTTON_HEIGHT, CONTENT_PADDING,
                 CORNER_BUTTON_AREA, CORNER_BUTTON_TOUCH_EXPANSION, FIRE24, REFRESH24, TEXT_TITLE,
                 TITLE_AREA, X32,
             },
-            component::{Button, ButtonMsg::Clicked, IconText},
         },
     },
 };
