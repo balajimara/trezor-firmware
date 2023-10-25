@@ -5,13 +5,12 @@ use crate::ui::{
     display::{Color, Icon},
     geometry::{Alignment2D, Insets, Offset, Point, Rect},
     model_tt::{
-        component::{Button, ButtonMsg::Clicked},
+        component::{Button, ButtonMsg::Clicked, ButtonStyleSheet},
         constant::WIDTH,
         theme::{
             bootloader::{
-                button_bld_menu, BUTTON_AREA_START, BUTTON_HEIGHT, CONTENT_PADDING,
-                CORNER_BUTTON_AREA, CORNER_BUTTON_TOUCH_EXPANSION, INFO32, TEXT_FINGERPRINT,
-                TEXT_TITLE, TITLE_AREA, X32,
+                text_fingerprint, text_title, BUTTON_AREA_START, BUTTON_HEIGHT, CONTENT_PADDING,
+                CORNER_BUTTON_AREA, CORNER_BUTTON_TOUCH_EXPANSION, INFO32, TITLE_AREA, X32,
             },
             WHITE,
         },
@@ -65,6 +64,7 @@ where
         bg_color: Color,
         left_button: Button<&'static str>,
         right_button: Button<&'static str>,
+        menu_button: ButtonStyleSheet,
         title: ConfirmTitle<T>,
         message: Label<T>,
         alert: Option<Label<T>>,
@@ -80,16 +80,20 @@ where
             left_button: Child::new(left_button),
             right_button: Child::new(right_button),
             info: info.map(|(title, text)| ConfirmInfo {
-                title: Child::new(Label::left_aligned(title, TEXT_TITLE).vertically_centered()),
-                text: Child::new(Label::left_aligned(text, TEXT_FINGERPRINT).vertically_centered()),
+                title: Child::new(
+                    Label::left_aligned(title, text_title(bg_color)).vertically_centered(),
+                ),
+                text: Child::new(
+                    Label::left_aligned(text, text_fingerprint(bg_color)).vertically_centered(),
+                ),
                 info_button: Child::new(
                     Button::with_icon(Icon::new(INFO32))
-                        .styled(button_bld_menu())
+                        .styled(menu_button)
                         .with_expanded_touch_area(Insets::uniform(CORNER_BUTTON_TOUCH_EXPANSION)),
                 ),
                 close_button: Child::new(
                     Button::with_icon(Icon::new(X32))
-                        .styled(button_bld_menu())
+                        .styled(menu_button)
                         .with_expanded_touch_area(Insets::uniform(CORNER_BUTTON_TOUCH_EXPANSION)),
                 ),
             }),

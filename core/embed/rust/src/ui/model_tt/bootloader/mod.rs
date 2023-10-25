@@ -16,10 +16,11 @@ use crate::{
             constant,
             theme::{
                 bootloader::{
-                    button_bld, button_confirm, button_wipe_cancel, button_wipe_confirm, BLD_BG,
-                    BLD_FG, BLD_WIPE_COLOR, CHECK24, CHECK40, DOWNLOAD32, FIRE32, FIRE40,
-                    RESULT_FW_INSTALL, RESULT_INITIAL, RESULT_WIPE, TEXT_BOLD, TEXT_NORMAL,
-                    TEXT_WIPE_BOLD, TEXT_WIPE_NORMAL, WARNING40, WELCOME_COLOR, X24,
+                    button_bld, button_bld_menu, button_confirm, button_wipe_cancel,
+                    button_wipe_confirm, BLD_BG, BLD_FG, BLD_WIPE_COLOR, CHECK24, CHECK40,
+                    DOWNLOAD32, FIRE32, FIRE40, RESULT_FW_INSTALL, RESULT_INITIAL, RESULT_WIPE,
+                    TEXT_BOLD, TEXT_NORMAL, TEXT_WIPE_BOLD, TEXT_WIPE_NORMAL, WARNING40,
+                    WELCOME_COLOR, X24,
                 },
                 BACKLIGHT_DIM, BACKLIGHT_NORMAL, FG, WHITE,
             },
@@ -179,6 +180,7 @@ extern "C" fn screen_install_confirm(
         BLD_BG,
         left,
         right,
+        button_bld_menu(),
         ConfirmTitle::Text(title),
         msg,
         alert,
@@ -205,6 +207,7 @@ extern "C" fn screen_wipe_confirm() -> u32 {
         BLD_WIPE_COLOR,
         left,
         right,
+        button_bld_menu(),
         ConfirmTitle::Icon(icon),
         msg,
         Some(alert),
@@ -300,8 +303,9 @@ extern "C" fn screen_wipe_progress(progress: u16, initialize: bool) {
 }
 
 #[no_mangle]
-extern "C" fn screen_connect() {
-    let mut frame = Connect::new("Waiting for host...");
+extern "C" fn screen_connect(initial_setup: bool) {
+    let bg = if initial_setup { WELCOME_COLOR } else { BLD_BG };
+    let mut frame = Connect::new("Waiting for host...", bg);
     show(&mut frame, true);
 }
 

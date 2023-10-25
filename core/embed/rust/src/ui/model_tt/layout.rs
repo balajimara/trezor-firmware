@@ -1594,10 +1594,7 @@ extern "C" fn new_confirm_firmware_update(
     args: *const Obj,
     kwargs: *mut Map,
 ) -> Obj {
-    use super::{
-        component::bl_confirm::{Confirm, ConfirmTitle},
-        theme::bootloader::{button_bld, button_confirm, BLD_BG},
-    };
+    use super::component::bl_confirm::{Confirm, ConfirmTitle};
     let block = move |_args: &[Obj], kwargs: &Map| {
         let description: StrBuffer = kwargs.get(Qstr::MP_QSTR_description)?.try_into()?;
         let fingerprint: StrBuffer = kwargs.get(Qstr::MP_QSTR_fingerprint)?.try_into()?;
@@ -1606,13 +1603,14 @@ extern "C" fn new_confirm_firmware_update(
         let title = Label::left_aligned(title_str, theme::TEXT_BOLD).vertically_centered();
         let msg = Label::left_aligned(description, theme::TEXT_NORMAL);
 
-        let left = Button::with_text("CANCEL").styled(button_bld());
-        let right = Button::with_text("INSTALL").styled(button_confirm());
+        let left = Button::with_text("CANCEL").styled(theme::button_default());
+        let right = Button::with_text("INSTALL").styled(theme::button_confirm());
 
         let obj = LayoutObj::new(Confirm::new(
-            BLD_BG,
+            theme::BG,
             left,
             right,
+            theme::button_moreinfo(),
             ConfirmTitle::Text(title),
             msg,
             None,
