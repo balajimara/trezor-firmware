@@ -1,7 +1,7 @@
 use crate::ui::{
     component::{Component, Event, EventCtx, Never, Pad},
     constant::screen,
-    display::{self, Font},
+    display::{self, Color, Font},
     geometry::{Offset, Rect},
     model_tt::theme::bootloader::BLD_TITLE_COLOR,
 };

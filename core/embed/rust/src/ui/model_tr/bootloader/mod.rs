@@ -14,7 +14,6 @@ use heapless::String;
 
 use super::component::{ResultScreen, WelcomeScreen};
 
-mod confirm;
 mod connect;
 mod intro;
 mod menu;
@@ -26,13 +25,15 @@ use crate::{
         constant,
         constant::HEIGHT,
         geometry::Point,
-        model_tr::theme::{
-            bootloader::{BLD_BG, BLD_FG, ICON_ALERT, ICON_SPINNER, ICON_SUCCESS},
-            ICON_ARM_LEFT, ICON_ARM_RIGHT, TEXT_BOLD, TEXT_NORMAL, WHITE,
+        model_tr::{
+            component::bl_confirm::{Confirm, ConfirmMsg},
+            theme::{
+                bootloader::{BLD_BG, BLD_FG, ICON_ALERT, ICON_SPINNER, ICON_SUCCESS},
+                ICON_ARM_LEFT, ICON_ARM_RIGHT, TEXT_BOLD, TEXT_NORMAL, WHITE,
+            },
         },
     },
 };
-use confirm::Confirm;
 use connect::Connect;
 use intro::Intro;
 use menu::Menu;
@@ -53,6 +54,12 @@ impl ReturnToC for Never {
 impl ReturnToC for () {
     fn return_to_c(self) -> u32 {
         0
+    }
+}
+
+impl ReturnToC for ConfirmMsg {
+    fn return_to_c(self) -> u32 {
+        self as u32
     }
 }
 
@@ -293,7 +300,7 @@ extern "C" fn screen_wipe_progress(progress: u16, initialize: bool) {
 }
 
 #[no_mangle]
-extern "C" fn screen_connect() {
+extern "C" fn screen_connect(_initial_setup: bool) {
     let mut frame = Connect::new("Waiting for host...");
     show(&mut frame);
 }
