@@ -14,6 +14,8 @@ use super::component::{ButtonStyle, ButtonStyleSheet, LoaderStyle, LoaderStyleSh
 
 use num_traits::FromPrimitive;
 
+pub mod bootloader;
+
 pub const ERASE_HOLD_DURATION: Duration = Duration::from_millis(1500);
 
 // Typical backlight values.
