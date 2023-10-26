@@ -622,6 +622,7 @@ def download(
 @click.option("--bitcoin-only/--universal", is_flag=True, default=None, help="Download bitcoin-only or universal firmware (defaults to universal)")
 @click.option("--raw", is_flag=True, help="Push raw firmware data to Trezor")
 @click.option("--fingerprint", help="Expected firmware fingerprint in hex")
+@click.option("--force-ilu", is_flag=True, help="Force interaction-less firmware update even when it is not expected to work")
 # fmt: on
 @click.pass_obj
 def update(
@@ -635,6 +636,7 @@ def update(
     dry_run: bool,
     beta: bool,
     bitcoin_only: Optional[bool],
+    force_ilu: bool,
 ) -> None:
     """Upload new firmware to device.
 
@@ -647,10 +649,14 @@ def update(
     against downloaded firmware fingerprint. Otherwise fingerprint is checked
     against data.trezor.io information, if available.
     """
+    if sum(bool(x) for x in (filename, url, version)) > 1:
+        raise click.ClickException("You can use only one of: filename, url, version.")
+
     with obj.client_context() as client:
-        if sum(bool(x) for x in (filename, url, version)) > 1:
-            click.echo("You can use only one of: filename, url, version.")
-            sys.exit(1)
+        if force_ilu and client.features.bootloader_mode:
+            raise click.ClickException(
+                "Cannot force ILU, device is already in bootloader mode."
+            )
 
         if filename:
             firmware_data = filename.read()
@@ -683,7 +689,7 @@ def update(
             return
 
         if not client.features.bootloader_mode:
-            if _is_strict_update(client, firmware_data):
+            if force_ilu or _is_strict_update(client, firmware_data):
                 header_size = _get_firmware_header_size(firmware_data)
                 device.reboot_to_bootloader(
                     client,
@@ -704,8 +710,7 @@ def update(
 
     with obj.client_context() as client:
         if not client.features.bootloader_mode:
-            click.echo("Please switch your device to bootloader mode.")
-            sys.exit(1)
+            raise click.ClickException("Please switch your device to bootloader mode.")
 
         upload_firmware_into_device(client=client, firmware_data=firmware_data)
 
