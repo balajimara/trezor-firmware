@@ -202,7 +202,9 @@ secbool flash_area_erase_partial(const flash_area_t *area, uint32_t offset,
                              FLASH_SECTOR_TABLE[sector_index];
 
       if (offset == sector_offset) {
-        memset(FLASH_BUFFER + sector_offset, 0xFF, sector_size);
+        uint8_t *flash =
+            (uint8_t *)flash_get_address(sector_index, 0, sector_size);
+        memset(flash, 0xFF, sector_size);
         *bytes_erased = sector_size;
         return sectrue;
       }
