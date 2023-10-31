@@ -33,8 +33,9 @@ const flash_area_t TRANSLATIONS_AREA = {
     .num_subareas = 1,
     .subarea[0] =
         {
-            .first_sector = 13,
-            .num_sectors = 2,
+            // TODO: can we use the 4th sector?
+            .first_sector = 12,
+            .num_sectors = 3,
         },
 };
 
