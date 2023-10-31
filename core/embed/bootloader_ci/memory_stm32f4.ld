@@ -69,4 +69,8 @@ SECTIONS {
     . = ALIGN(4);
   } >SRAM
 
+  .boot_args : ALIGN(4) {
+    *(.boot_args*);
+    . = ALIGN(4);
+  } >BOOT_ARGS
 }

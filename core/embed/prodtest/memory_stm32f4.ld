@@ -74,4 +74,9 @@ SECTIONS {
   .stack : ALIGN(8) {
     . = 4K; /* this acts as a build time assertion that at least this much memory is available for stack use */
   } >SRAM
+
+  .boot_args : ALIGN(4) {
+    *(.boot_args*);
+    . = ALIGN(4);
+  } >BOOT_ARGS
 }
