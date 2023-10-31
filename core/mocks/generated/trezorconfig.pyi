@@ -123,6 +123,13 @@ def translations_wipe() -> None:
 
 
 # extmod/modtrezorconfig/modtrezorconfig.c
+def translations_max_bytesize() -> int:
+    """
+    How much is the maximum bytesize of translations data
+    """
+
+
+# extmod/modtrezorconfig/modtrezorconfig.c
 def delete(
     app: int, key: int, public: bool = False, writable_locked: bool = False
 ) -> bool:

@@ -1,8 +1,5 @@
-from micropython import const
-
 from trezor import config
 
-DATA_MAXLENGTH = const(32 * 1024)
 DEFAULT_LANGUAGE = "en-US"
 
 
@@ -18,7 +15,7 @@ def get_language() -> str:
 def write(data: bytes, offset: int) -> None:
     from trezor import wire
 
-    if offset + len(data) > DATA_MAXLENGTH:
+    if offset + len(data) > data_max_size():
         raise wire.DataError("Language data too long")
 
     config.translations_set(data, offset)
@@ -26,3 +23,7 @@ def write(data: bytes, offset: int) -> None:
 
 def wipe() -> None:
     config.translations_wipe()
+
+
+def data_max_size() -> int:
+    return config.translations_max_bytesize()

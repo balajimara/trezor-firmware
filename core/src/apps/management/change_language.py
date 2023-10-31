@@ -92,7 +92,7 @@ async def change_language(msg: ChangeLanguage) -> Success:
         translations.wipe()
         return Success(message="Language reverted to default")
 
-    if data_length > translations.DATA_MAXLENGTH:
+    if data_length > translations.data_max_size():
         raise DataError("Translations too long")
     if data_length < _HEADER_SIZE:
         raise DataError("Translations too short")
@@ -117,6 +117,8 @@ async def change_language(msg: ChangeLanguage) -> Success:
     # Confirm with user and wipe old data
     await _require_confirm_change_language(header.language)
     translations.wipe()
+
+    # TODO: add loader, so that the screen does not freeze?
 
     # Write the header
     translations.write(header_data, 0)

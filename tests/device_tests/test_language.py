@@ -33,7 +33,7 @@ TRANSLATIONS = CORE / "embed" / "rust" / "src" / "ui" / "translations"
 CS_JSON = TRANSLATIONS / "cs.json"
 FR_JSON = TRANSLATIONS / "fr.json"
 
-MAX_DATA_LENGTH = 32 * 1024
+MAX_DATA_LENGTH = {"T": 48 * 1024, "Safe 3": 32 * 1024}
 
 
 @contextmanager
@@ -83,10 +83,11 @@ def test_change_language_errors(client: Client):
         assert client.features.language == "en-US"
 
         # Translations too long
+        max_length = MAX_DATA_LENGTH[client.features.model]
         with pytest.raises(
             exceptions.TrezorFailure, match="Translations too long"
         ), client:
-            device.change_language(client, language_data=(MAX_DATA_LENGTH + 1) * b"a")
+            device.change_language(client, language_data=(max_length + 1) * b"a")
         assert client.features.language == "en-US"
 
         # Invalid header data length
