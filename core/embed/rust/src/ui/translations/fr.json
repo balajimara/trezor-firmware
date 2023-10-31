@@ -1,4 +1,7 @@
 {
+  "font": {
+    "file": "font_pixeloperator_regular_8_fr.json"
+  },
   "header": {
     "language": "fr",
     "version": "2.6.3"

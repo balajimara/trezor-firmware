@@ -6,19 +6,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TextIO
+from typing import TextIO, Any
+import json
 
 # pip install freetype-py
 import freetype
 
-from foreign_chars import non_english_chars
+from foreign_chars import all_languages
 
 HERE = Path(__file__).parent
 FONTS_DIR = HERE / "fonts"
 
 MIN_GLYPH = ord(" ")
-MAX_ASCII_GLYPH = ord("~")
-MAX_GLYPH = MAX_ASCII_GLYPH + len(non_english_chars)
+MAX_GLYPH = ord("~")
 
 # metrics explanation: https://www.freetype.org/freetype2/docs/glyphs/metrics.png
 
@@ -166,6 +166,12 @@ class Glyph:
             )
         )
 
+    def process_byte(self, b: int) -> int:
+        if self.inverse_colors:
+            return b ^ 0xFF
+        else:
+            return b
+
     def get_definition_line(
         self, name_style_size: str, bpp: int, i: int | str, static: bool = True
     ) -> str:
@@ -183,18 +189,12 @@ class Glyph:
             )
         )
 
-        def process_byte(b: int) -> int:
-            if self.inverse_colors:
-                return b ^ 0xFF
-            else:
-                return b
-
         if len(self.buf) > 0:
             line = line + (
                 ", "
                 + ", ".join(
                     [
-                        "%d" % process_byte(x)
+                        "%d" % self.process_byte(x)
                         for x in process_bitmap_buffer(self.buf, bpp)
                     ]
                 )
@@ -206,6 +206,18 @@ class Glyph:
             line = line.replace("static const", "const")
 
         return line
+
+    def get_json_list(self, bpp: int) -> list[int]:
+        infos = [
+            self.width,
+            self.rows,
+            self.advance,
+            self.bearingX,
+            self.bearingY,
+        ]
+        data = [self.process_byte(x) for x in process_bitmap_buffer(self.buf, bpp)]
+
+        return infos + data
 
 
 class FaceProcessor:
@@ -244,8 +256,35 @@ class FaceProcessor:
         return f"font_{self.fontname}.h"
 
     def write_files(self) -> None:
+        self.write_c_files()
+        self.write_foreign_json()
+
+    def write_c_files(self) -> None:
         self._write_c_file()
         self._write_h_file()
+
+    def write_foreign_json(self) -> None:
+        def int_list_to_hex(int_list: list[int]) -> str:
+            return "".join(f"{x:02x}" for x in int_list)
+
+        for language in all_languages:
+            all_objects: list[dict[str, Any]] = []
+            for item in language["data"]:
+                c = item[0]
+                self._load_char(c)
+                glyph = Glyph.from_face(self.face, c, self.shaveX)
+                glyph.print_metrics()
+                json_list = glyph.get_json_list(self.bpp)
+                obj = {
+                    "char": c,
+                    "utf8": item[1],
+                    "data": int_list_to_hex(json_list),
+                }
+                print("obj", obj)
+                all_objects.append(obj)
+            filename = f"font_{self.fontname}_{language['name']}.json"
+            with open(filename, "w", encoding="utf-8") as f:
+                json.dump(all_objects, f, indent=2, ensure_ascii=False)
 
     def _write_c_file(self) -> None:
         with open(self._c_file_name, "wt") as f:
@@ -254,15 +293,8 @@ class FaceProcessor:
 
     def _write_c_file_content(self, f: TextIO) -> None:
         # Write "normal" ASCII characters
-        for i in range(MIN_GLYPH, MAX_ASCII_GLYPH + 1):
+        for i in range(MIN_GLYPH, MAX_GLYPH + 1):
             c = chr(i)
-            self._write_char_definition(f, c, i)
-
-        # Write non-english characters
-        f.write("\n")
-        for index, item in enumerate(non_english_chars):
-            c = item[0]
-            i = MAX_ASCII_GLYPH + index + 1
             self._write_char_definition(f, c, i)
 
         # Write non-printable character

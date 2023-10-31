@@ -19,16 +19,18 @@ class TranslationsHeader:
 
     def __init__(
         self,
-        language: str,
         version: str,
+        language: str,
         data_length: int,
-        items_num: int,
+        translations_length: int,
+        translations_num: int,
         data_hash: bytes,
     ):
-        self.language = language
         self.version = version
+        self.language = language
         self.data_length = data_length
-        self.items_num = items_num
+        self.translations_length = translations_length
+        self.translations_num = translations_num
         self.data_hash = data_hash
 
     @classmethod
@@ -50,7 +52,8 @@ class TranslationsHeader:
             version = r.read(cls.VERSION_LEN).rstrip(_FILL_BYTE).decode()
             language = r.read(cls.LANG_LEN).rstrip(_FILL_BYTE).decode()
             data_length = readers.read_uint16_le(r)
-            items_num = readers.read_uint16_le(r)
+            translations_length = readers.read_uint16_le(r)
+            translations_num = readers.read_uint16_le(r)
             data_hash = r.read(cls.DATA_HASH_LEN)
 
             # Rest must be empty bytes
@@ -62,7 +65,8 @@ class TranslationsHeader:
                 language=language,
                 version=version,
                 data_length=data_length,
-                items_num=items_num,
+                translations_length=translations_length,
+                translations_num=translations_num,
                 data_hash=data_hash,
             )
         except EOFError:
