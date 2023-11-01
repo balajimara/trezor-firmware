@@ -22,6 +22,7 @@
 #include "lowlevel.h"
 #include "common.h"
 #include "flash.h"
+#include "flash_otp.h"
 #include "model.h"
 #include TREZOR_BOARD
 
