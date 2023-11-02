@@ -23,10 +23,8 @@
 #include "common.h"
 #include "flash.h"
 
-
 #define FLASH_STATUS_ALL_FLAGS \
   (FLASH_NSSR_PGSERR | FLASH_NSSR_PGAERR | FLASH_NSSR_WRPERR | FLASH_NSSR_EOP)
-
 
 void flash_otp_init() {
   // intentionally left empty

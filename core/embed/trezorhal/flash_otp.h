@@ -8,7 +8,6 @@
 
 void flash_otp_init(void);
 
-
 uint32_t flash_wait_and_clear_status_flags(void);
 
 secbool __wur flash_otp_read(uint8_t block, uint8_t offset, uint8_t *data,

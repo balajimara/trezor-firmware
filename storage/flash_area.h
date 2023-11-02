@@ -43,7 +43,7 @@
  * first_sector and num_sectors.
  */
 
-typedef struct { 
+typedef struct {
   uint16_t first_sector;
   uint16_t num_sectors;
 } flash_subarea_t;

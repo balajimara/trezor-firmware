@@ -26,7 +26,7 @@
 // Flash memory low-level API, providing abstraction for
 // various flash archictures found on STM32 MCUs
 
-// The 'sector' parameter in this API can represent 
+// The 'sector' parameter in this API can represent
 //    1. Non-uniform sector number on STM32F4
 //    2. Uniform page number on STM32U5
 
@@ -34,12 +34,12 @@
 // Returns 0 if any of the sectors is out of range
 uint32_t flash_sector_size(uint16_t first_sector, uint16_t sector_count);
 
-// Returns number of the sector/page at specified byte 'offset' 
+// Returns number of the sector/page at specified byte 'offset'
 // from the beginning of the 'first_sector'
 uint16_t flash_sector_find(uint16_t first_sector, uint32_t offset);
 
-// Returns the physical address of a byte on specified 'offset' in the specified 'sector'
-// Checks if it's possible to access continues space of 'size' bytes
+// Returns the physical address of a byte on specified 'offset' in the specified
+// 'sector'. Checks if it's possible to access continues space of 'size' bytes
 // Returns NULL i [offset, offset + size] is of out of the specified sector
 const void *flash_get_address(uint16_t sector, uint32_t offset, uint32_t size);
 

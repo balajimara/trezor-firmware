@@ -29,8 +29,6 @@
   (FLASH_SR_RDERR | FLASH_SR_PGSERR | FLASH_SR_PGPERR | FLASH_SR_PGAERR | \
    FLASH_SR_WRPERR | FLASH_SR_SOP | FLASH_SR_EOP)
 
-
-
 void flash_otp_init() {
   // intentionally left empty
 }
