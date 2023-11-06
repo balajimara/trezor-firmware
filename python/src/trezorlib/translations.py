@@ -17,8 +17,8 @@ FontData = Dict[str, str]
 def blob_from_file(file: TextIO, model: str) -> bytes:
     data = json.load(file)
     file_dir = file.name.rsplit("/", 1)[0]
-    file_dir_absolute_path = Path(file_dir).absolute()
-    return blob_from_dict(data, file_dir_absolute_path, model)
+    font_dir = Path(file_dir).absolute() / "fonts"
+    return blob_from_dict(data, font_dir, model)
 
 
 def blob_from_url(url: str) -> bytes:
@@ -27,21 +27,21 @@ def blob_from_url(url: str) -> bytes:
     return r.content
 
 
-def blob_from_dict(data: Dict[str, Any], file_dir: Path, model: str) -> bytes:
+def blob_from_dict(data: Dict[str, Any], font_dir: Path, model: str) -> bytes:
     header: HeaderData = data["header"]
     translations: TranslationData = data["translations"]
     font = data["font"]
     if model not in font:
         raise ValueError(f"Font for model {model} not found")
     model_font: FontData = font[model]
-    return _blob_from_data(header, translations, model_font, file_dir)
+    return _blob_from_data(header, translations, model_font, font_dir)
 
 
 def _blob_from_data(
-    header: HeaderData, translations: TranslationData, font: FontData, file_dir: Path
+    header: HeaderData, translations: TranslationData, font: FontData, font_dir: Path
 ) -> bytes:
     translations_blob, translations_num = _create_translations_blob(translations)
-    font_blob = _create_font_blob(font, file_dir)
+    font_blob = _create_font_blob(font, font_dir)
 
     data_blob = translations_blob + font_blob
 
@@ -59,8 +59,8 @@ def _blob_from_data(
     return header_blob + data_blob
 
 
-def _create_font_blob(font: FontData, file_dir: Path) -> bytearray:
-    file_path = file_dir / font["file"]
+def _create_font_blob(font: FontData, font_dir: Path) -> bytearray:
+    file_path = font_dir / font["file"]
     json_content = json.loads(file_path.read_text())
     data_length = len(json_content)
 

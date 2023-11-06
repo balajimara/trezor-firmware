@@ -29,6 +29,7 @@ pytestmark = pytest.mark.skip_t1
 HERE = Path(__file__).parent.resolve()
 CORE = HERE.parent.parent / "core"
 TRANSLATIONS = CORE / "embed" / "rust" / "src" / "ui" / "translations"
+FONTS = TRANSLATIONS / "fonts"
 
 CS_JSON = TRANSLATIONS / "cs.json"
 FR_JSON = TRANSLATIONS / "fr.json"
@@ -132,7 +133,7 @@ def test_change_language_errors(client: Client):
             device.change_language(
                 client,
                 language_data=translations.blob_from_dict(
-                    data, file_dir=TRANSLATIONS, model=client.features.model or ""
+                    data, file_dir=FONTS, model=client.features.model or ""
                 ),
             )
         assert client.features.language == "en-US"
@@ -147,7 +148,7 @@ def test_change_language_errors(client: Client):
             device.change_language(
                 client,
                 language_data=translations.blob_from_dict(
-                    data, file_dir=TRANSLATIONS, model=client.features.model or ""
+                    data, file_dir=FONTS, model=client.features.model or ""
                 ),
             )
         assert client.features.language == "en-US"
