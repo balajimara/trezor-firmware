@@ -200,6 +200,10 @@ const uint8_t *font_get_glyph(int font, uint8_t c) {
     case FONT_MONO:
       return NONPRINTABLE_GLYPH(FONT_MONO_DATA);
 #endif
+#ifdef TREZOR_FONT_BIG_ENABLE
+    case FONT_BIG:
+      return NONPRINTABLE_GLYPH(FONT_BIG_DATA);
+#endif
   }
   return 0;
 }
