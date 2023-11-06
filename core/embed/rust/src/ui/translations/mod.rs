@@ -23,11 +23,17 @@ pub fn tr(key: &str) -> &'static str {
 // TODO: somehow make it a singleton object, so it is loaded just once
 
 struct TranslationsHeader {
+    /// Human readable language identifier (e.g. "cs" of "fr")
     pub language: &'static str,
+    /// Version in format {major}.{minor}.{patch}
     pub version: &'static str,
+    /// Overall length of the data blob (excluding the header)
     pub data_length: u16,
+    /// Length of the translation data
     pub translations_length: u16,
+    /// Number of translation items
     pub translations_num: u16,
+    /// Hash of the data blob (excluding the header)
     pub data_hash: [u8; 32],
 }
 
@@ -102,6 +108,45 @@ impl TranslationsHeader {
             data_hash,
         })
     }
+
+    pub fn font_start_offset(&self) -> u16 {
+        HEADER_LEN as u16 + self.translations_length
+    }
+
+    pub fn get_all_font_data(&self) -> &'static [u8] {
+        let translations_data = &translations_get()[HEADER_LEN..];
+        &translations_data[self.translations_length as usize..self.data_length as usize]
+    }
+
+    pub fn get_font_table(&self) -> TableData {
+        let all_font_data = self.get_all_font_data();
+        let data_size = all_font_data.len() as u16;
+
+        let (font_amount_bytes, data) = all_font_data.split_at(2);
+        let font_amount = u16::from_le_bytes(unwrap!(font_amount_bytes.try_into()));
+
+        const FONT_ENTRY_SIZE: usize = 4;
+        let pairs_size = font_amount as usize * FONT_ENTRY_SIZE;
+
+        let pairs_data = &data[..pairs_size];
+
+        TableData {
+            offset_table_data: pairs_data,
+            overall_len: data_size,
+        }
+    }
+
+    pub fn get_font_data_offset(&self, font_offset: u16, len: u16) -> &'static [u8] {
+        let all_font_data = self.get_all_font_data();
+        let start = font_offset as usize;
+        let end = start + len as usize;
+        &all_font_data[start..end]
+    }
+}
+
+pub struct TableData {
+    pub offset_table_data: &'static [u8],
+    pub overall_len: u16,
 }
 
 /// Get the language name.
@@ -158,47 +203,92 @@ fn get_translation_by_index(index: usize) -> Option<&'static str> {
     None
 }
 
-pub fn get_font_data() -> &'static [u8] {
-    if let Ok(header) = TranslationsHeader::from_flash() {
-        let translations_data = &translations_get()[HEADER_LEN..];
-        &translations_data[header.translations_length as usize..header.data_length as usize]
-    } else {
-        &[]
-    }
+fn read_u16_pairs(bytes: &'static [u8]) -> &'static [(u16, u16)] {
+    let len = bytes.len() / core::mem::size_of::<(u16, u16)>();
+    let ptr = bytes.as_ptr() as *const (u16, u16);
+
+    // SAFETY: The following conditions must hold:
+    // - `bytes` must be correctly aligned for `(u16, u16)` tuples.
+    // - `bytes` must be of a length that is a multiple of the size of `(u16, u16)`.
+    // - The lifetime `'static` ensures the reference is valid for the duration of
+    //   the program.
+    unsafe { core::slice::from_raw_parts(ptr, len) }
 }
 
-pub struct FontData {
+pub struct OffsetLen {
     pub offset: u16,
     pub len: u16,
 }
 
-fn get_font_offset(char_code: u16) -> Option<FontData> {
-    let font_data = get_font_data();
+/// Information about specific font - where it starts and how long it is
+fn get_font_offset(font_id: u16) -> Option<OffsetLen> {
+    let font_table = unwrap!(TranslationsHeader::from_flash()).get_font_table();
+    match_first_u16_pair(
+        font_id,
+        font_table.offset_table_data,
+        font_table.overall_len,
+    )
+}
+
+/// Returns the offset and length of the u16 pair whose first element matches
+/// `code_id`.
+fn match_first_u16_pair(
+    code_id: u16,
+    pairs_data: &'static [u8],
+    overall_len: u16,
+) -> Option<OffsetLen> {
+    // To get the length of the font, need to read the offset of the next font
+    let mut font_offset: Option<u16> = None;
+    let mut next_offset: Option<u16> = None;
+
+    for &(code, offset) in read_u16_pairs(pairs_data) {
+        if code == code_id {
+            font_offset = Some(offset);
+        } else if font_offset.is_some() {
+            next_offset = Some(offset);
+            break;
+        }
+    }
+
+    if let Some(offset) = font_offset {
+        // When our font was last, there is no next offset - use the data size
+        let next = next_offset.unwrap_or(overall_len);
+        let len = next - offset;
+        return Some(OffsetLen { offset, len });
+    }
+
+    None
+}
+
+// Get information about a given glyph with a given font-offset
+fn get_glyph_data(char_code: u16, font_offset: u16, font_len: u16) -> Option<OffsetLen> {
+    let font_data =
+        unwrap!(TranslationsHeader::from_flash()).get_font_data_offset(font_offset, font_len);
     let data_size = font_data.len() as u16;
 
-    let (font_amount_bytes, data) = font_data.split_at(2);
-    let font_amount = u16::from_le_bytes(unwrap!(font_amount_bytes.try_into()));
+    let (glyph_amount_bytes, data) = font_data.split_at(2);
+    let glyph_amount = u16::from_le_bytes(unwrap!(glyph_amount_bytes.try_into()));
 
     const FONT_ENTRY_SIZE: usize = 4;
 
-    for i in 0..font_amount {
-        let current_data = &data[(i as usize * FONT_ENTRY_SIZE)..];
-        let char_code_bytes = &current_data[..2];
-        let code = u16::from_le_bytes(unwrap!(char_code_bytes.try_into()));
+    let pairs_data = &data[..(glyph_amount as usize * FONT_ENTRY_SIZE)];
 
-        if code == char_code {
-            let font_size_bytes = &current_data[2..4];
-            let font_offset = u16::from_le_bytes(unwrap!(font_size_bytes.try_into()));
-            let len = if i == font_amount {
-                data_size - font_offset
-            } else {
-                let next_data = &data[((i + 1) as usize * FONT_ENTRY_SIZE)..];
-                let next_font_offset = u16::from_le_bytes(unwrap!(next_data[2..4].try_into()));
-                next_font_offset - font_offset
-            };
-            return Some(FontData {
-                offset: font_offset,
-                len,
+    match_first_u16_pair(char_code, pairs_data, data_size)
+}
+
+/// Get information about the glyph in the given font.
+/// First finding out the offset of the font within the translations data.
+/// Then finding out the offset of the glyph within the font.
+/// Returning the absolute offset of the glyph within the translations data -
+/// together with its length.
+fn get_glyph_font_data(char_code: u16, font_id: u16) -> Option<OffsetLen> {
+    if let Some(font_offset) = get_font_offset(font_id) {
+        if let Some(glyph_data) = get_glyph_data(char_code, font_offset.offset, font_offset.len) {
+            let font_start_offset = unwrap!(TranslationsHeader::from_flash()).font_start_offset();
+            let final_offset = font_start_offset + font_offset.offset + glyph_data.offset;
+            return Some(OffsetLen {
+                offset: final_offset,
+                len: glyph_data.len,
             });
         }
     }
@@ -206,18 +296,17 @@ fn get_font_offset(char_code: u16) -> Option<FontData> {
 }
 
 #[no_mangle]
-pub extern "C" fn get_utf8_glyph(char_code: cty::uint16_t) -> PointerData {
-    let font_data = get_font_offset(char_code);
-    if let Some(font_data) = font_data {
-        let font_start_offset = TranslationsHeader::from_flash()
-            .map_or(0, |header| HEADER_LEN as u16 + header.translations_length);
+pub extern "C" fn get_utf8_glyph(char_code: cty::uint16_t, font: cty::c_int) -> PointerData {
+    // C will send a negative number
+    let font_abs = font.unsigned_abs() as u16;
 
-        get_pointer_with_offset(font_start_offset + font_data.offset, font_data.len)
-    } else {
-        PointerData {
-            ptr: core::ptr::null(),
-            len: 0,
-        }
+    if let Some(glyph_data) = get_glyph_font_data(char_code, font_abs) {
+        return get_pointer_with_offset(glyph_data.offset, glyph_data.len);
+    }
+
+    PointerData {
+        ptr: core::ptr::null(),
+        len: 0,
     }
 }
 

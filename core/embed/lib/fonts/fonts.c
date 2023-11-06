@@ -143,8 +143,9 @@ const uint8_t *font_get_glyph(int font, uint8_t c) {
   // found UTF8 character
   // it is not hardcoded in firmware fonts, it must be extracted from the
   // embedded blob
+  // TODO: this should not happen in bootloader - how to defend against it?
   if (c_2bytes > 0xFF) {
-    PointerData glyph_data = get_utf8_glyph(c_2bytes);
+    PointerData glyph_data = get_utf8_glyph(c_2bytes, font);
     if (glyph_data.ptr != NULL) {
       return glyph_data.ptr;
     } else {

@@ -60,8 +60,57 @@ def _blob_from_data(
 
 
 def _create_font_blob(font: FontData, font_dir: Path) -> bytearray:
-    file_path = font_dir / font["file"]
-    json_content = json.loads(file_path.read_text())
+    """Example structure of the font dict:
+    (The beginning number corresponds to the C representation of each font)
+    {
+      "1_FONT_NORMAL": "font_tthoves_regular_21_cs.json",
+      "2_FONT_BOLD": "font_tthoves_bold_17_cs.json",
+      "3_FONT_MONO": "font_robotomono_medium_20_cs.json",
+      "4_FONT_BIG": null,
+      "5_FONT_DEMIBOLD": "font_tthoves_demibold_21_cs.json"
+    }
+    """
+    num_fonts: list[tuple[int, Path]] = []
+    for font_name, file_name in font.items():
+        if not file_name:
+            continue
+        file_path = font_dir / file_name
+        font_num = int(font_name.split("_")[0])
+        num_fonts.append((font_num, file_path))
+
+    data_length = len(num_fonts)
+
+    blob = bytearray()
+
+    # Data length (2 bytes)
+    blob += struct.pack("H", data_length)
+
+    # Initialize Index Table
+    # Each item has 2 bytes for font_num + 2 bytes for offset
+    index_table_pos = len(blob)
+    index_table_item_size = 2 + 2
+    blob.extend(bytearray(index_table_item_size * data_length))
+
+    # Append specific fonts and fill Index Table
+    offset = len(blob)
+    for font_num, file_path in sorted(num_fonts):
+        data = _font_blob_from_file(file_path)
+
+        # Update index table
+        struct.pack_into("HH", blob, index_table_pos, font_num, offset)
+
+        # Append character data
+        blob.extend(data)
+
+        # Update offset and index_table_pos
+        offset += len(data)
+        index_table_pos += index_table_item_size
+
+    return blob
+
+
+def _font_blob_from_file(json_file: Path) -> bytearray:
+    json_content = json.loads(json_file.read_text())
     data_length = len(json_content)
 
     blob = bytearray()
