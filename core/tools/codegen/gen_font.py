@@ -284,7 +284,8 @@ class FaceProcessor:
                 all_objects.append(obj)
             filename = f"font_{self.fontname}_{language['name']}.json"
             with open(filename, "w", encoding="utf-8") as f:
-                json.dump(all_objects, f, indent=2, ensure_ascii=False)
+                json_content = json.dumps(all_objects, indent=2, ensure_ascii=False)
+                f.write(json_content + "\n")
 
     def _write_c_file(self) -> None:
         with open(self._c_file_name, "wt") as f:
