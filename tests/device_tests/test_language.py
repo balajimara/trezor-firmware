@@ -116,7 +116,8 @@ def test_change_language_errors(client: Client):
                 data = json.load(f)
             data["header"]["version"] = "3.5.4"
             device.change_language(
-                client, language_data=translations.blob_from_dict(data)
+                client,
+                language_data=translations.blob_from_dict(data, file_dir=TRANSLATIONS),
             )
         assert client.features.language == "en-US"
 
@@ -128,7 +129,7 @@ def test_change_language_errors(client: Client):
                 data = json.load(f)
             data["header"]["version"] = "ABC.XYZ.DEF"
             device.change_language(
-                client, language_data=translations.blob_from_dict(data)
+                client, language_data=translations.blob_from_dict(data, file_dir=TRANSLATIONS)
             )
         assert client.features.language == "en-US"
 
