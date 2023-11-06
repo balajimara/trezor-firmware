@@ -1,6 +1,11 @@
 {
   "font": {
-    "file": "font_pixeloperator_regular_8_fr.json"
+    "T": {
+      "file": "font_roboto_regular_20_fr.json"
+    },
+    "Safe 3": {
+      "file": "font_pixeloperator_regular_8_fr.json"
+    }
   },
   "header": {
     "language": "fr",

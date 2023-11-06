@@ -55,12 +55,18 @@ def _set_english_return_back(client: Client) -> Generator[Client, None, None]:
 
 def _set_full_czech(client: Client):
     with client, open(CS_JSON, "r") as f:
-        device.change_language(client, language_data=translations.blob_from_file(f))
+        device.change_language(
+            client,
+            language_data=translations.blob_from_file(f, client.features.model or ""),
+        )
 
 
 def _set_full_french(client: Client):
     with client, open(FR_JSON, "r") as f:
-        device.change_language(client, language_data=translations.blob_from_file(f))
+        device.change_language(
+            client,
+            language_data=translations.blob_from_file(f, client.features.model or ""),
+        )
 
 
 def _set_default_english(client: Client):
@@ -96,7 +102,11 @@ def test_change_language_errors(client: Client):
         ), client:
             with open(CS_JSON, "r") as f:
                 device.change_language(
-                    client, language_data=translations.blob_from_file(f) + b"abc"
+                    client,
+                    language_data=translations.blob_from_file(
+                        f, client.features.model or ""
+                    )
+                    + b"abc",
                 )
         assert client.features.language == "en-US"
 
@@ -104,7 +114,11 @@ def test_change_language_errors(client: Client):
         with pytest.raises(exceptions.TrezorFailure, match="Invalid data hash"), client:
             with open(CS_JSON, "r") as f:
                 device.change_language(
-                    client, language_data=translations.blob_from_file(f)[:-4] + b"abcd"
+                    client,
+                    language_data=translations.blob_from_file(
+                        f, client.features.model or ""
+                    )[:-4]
+                    + b"abcd",
                 )
         assert client.features.language == "en-US"
 
@@ -117,7 +131,9 @@ def test_change_language_errors(client: Client):
             data["header"]["version"] = "3.5.4"
             device.change_language(
                 client,
-                language_data=translations.blob_from_dict(data, file_dir=TRANSLATIONS),
+                language_data=translations.blob_from_dict(
+                    data, file_dir=TRANSLATIONS, model=client.features.model or ""
+                ),
             )
         assert client.features.language == "en-US"
 
@@ -129,7 +145,10 @@ def test_change_language_errors(client: Client):
                 data = json.load(f)
             data["header"]["version"] = "ABC.XYZ.DEF"
             device.change_language(
-                client, language_data=translations.blob_from_dict(data, file_dir=TRANSLATIONS)
+                client,
+                language_data=translations.blob_from_dict(
+                    data, file_dir=TRANSLATIONS, model=client.features.model or ""
+                ),
             )
         assert client.features.language == "en-US"
 

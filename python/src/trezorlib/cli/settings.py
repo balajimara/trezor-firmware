@@ -219,7 +219,9 @@ def language(client: "TrezorClient", file: TextIO, url: str, remove: bool) -> st
         language_data = b""
     else:
         if file:
-            language_data = translations.blob_from_file(file)
+            model = client.features.model
+            assert model is not None
+            language_data = translations.blob_from_file(file, model)
         elif url:
             language_data = translations.blob_from_url(url)
         else:

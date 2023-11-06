@@ -14,11 +14,11 @@ HeaderData = Dict[str, str]
 FontData = Dict[str, str]
 
 
-def blob_from_file(file: TextIO) -> bytes:
+def blob_from_file(file: TextIO, model: str) -> bytes:
     data = json.load(file)
     file_dir = file.name.rsplit("/", 1)[0]
     file_dir_absolute_path = Path(file_dir).absolute()
-    return blob_from_dict(data, file_dir_absolute_path)
+    return blob_from_dict(data, file_dir_absolute_path, model)
 
 
 def blob_from_url(url: str) -> bytes:
@@ -27,11 +27,14 @@ def blob_from_url(url: str) -> bytes:
     return r.content
 
 
-def blob_from_dict(data: Dict[str, Any], file_dir: Path) -> bytes:
+def blob_from_dict(data: Dict[str, Any], file_dir: Path, model: str) -> bytes:
     header: HeaderData = data["header"]
     translations: TranslationData = data["translations"]
-    font: FontData = data["font"]
-    return _blob_from_data(header, translations, font, file_dir)
+    font = data["font"]
+    if model not in font:
+        raise ValueError(f"Font for model {model} not found")
+    model_font: FontData = font[model]
+    return _blob_from_data(header, translations, model_font, file_dir)
 
 
 def _blob_from_data(
