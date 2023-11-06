@@ -15,9 +15,8 @@ pub fn translations_get() -> &'static [u8] {
     unsafe { core::slice::from_raw_parts(ptr, len as usize) }
 }
 
-pub fn get_font_pointer(area_offset: u16, len: u16) -> PointerData {
-    let mut overall_len: u32 = 0;
-    let ptr = unsafe { ffi::translations_read(&mut overall_len, area_offset.into()) };
+pub fn get_pointer_with_offset(area_offset: u16, len: u16) -> PointerData {
+    let ptr = unsafe { ffi::translations_read(&mut 0, area_offset.into()) };
     if ptr.is_null() {
         fatal_error!("Translations read failed", "");
     }

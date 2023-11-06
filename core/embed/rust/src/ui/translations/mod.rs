@@ -7,7 +7,7 @@ mod micropython;
 
 use en::EN_TRANSLATIONS;
 
-use crate::trezorhal::translations::{get_font_pointer, translations_get, PointerData};
+use crate::trezorhal::translations::{get_pointer_with_offset, translations_get, PointerData};
 use core::str;
 
 // Translations strings are delimited by a star
@@ -172,7 +172,7 @@ pub struct FontData {
     pub len: u16,
 }
 
-pub fn get_font_offset(char_code: u16) -> Option<FontData> {
+fn get_font_offset(char_code: u16) -> Option<FontData> {
     let font_data = get_font_data();
     let data_size = font_data.len() as u16;
 
@@ -212,7 +212,7 @@ pub extern "C" fn get_utf8_glyph(char_code: cty::uint16_t) -> PointerData {
         let font_start_offset = TranslationsHeader::from_flash()
             .map_or(0, |header| HEADER_LEN as u16 + header.translations_length);
 
-        get_font_pointer(font_start_offset + font_data.offset, font_data.len)
+        get_pointer_with_offset(font_start_offset + font_data.offset, font_data.len)
     } else {
         PointerData {
             ptr: core::ptr::null(),
