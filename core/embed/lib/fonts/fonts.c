@@ -141,6 +141,8 @@ const uint8_t *font_get_glyph(int font, uint8_t c) {
   if (!c_2bytes) return 0;
 
   // found UTF8 character
+  // it is not hardcoded in firmware fonts, it must be extracted from the
+  // embedded blob
   if (c_2bytes > 0xFF) {
     PointerData glyph_data = get_utf8_glyph(c_2bytes);
     if (glyph_data.ptr != NULL) {
@@ -150,9 +152,8 @@ const uint8_t *font_get_glyph(int font, uint8_t c) {
     }
   }
 
-  // printable character
-  // TODO: take the highest number as a constant from all the fonts
-  if (is_printable && c_2bytes >= ' ' && c_2bytes <= 186) {
+  // printable ASCII character
+  if (is_printable && c_2bytes >= ' ' && c_2bytes <= 126) {
     switch (font) {
 #ifdef TREZOR_FONT_NORMAL_ENABLE
       case FONT_NORMAL:
