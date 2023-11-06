@@ -20,7 +20,7 @@
 #include "fonts.h"
 #include <stdbool.h>
 #include <stdio.h>
-#include "librust.h"
+#include "librust_fonts.h"
 
 // TODO: make it return uint32_t (needs logic to assemble at most 4 bytes
 // together)
