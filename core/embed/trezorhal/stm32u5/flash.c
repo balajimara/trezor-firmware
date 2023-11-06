@@ -64,7 +64,8 @@ const void *flash_get_address(uint16_t sector, uint32_t offset, uint32_t size) {
     return NULL;
   }
 
-  if (offset + size > FLASH_PAGE_SIZE) {
+  if (sector * FLASH_PAGE_SIZE + offset + size >
+      FLASH_PAGE_SIZE * FLASH_SECTOR_COUNT) {
     return NULL;
   }
 
