@@ -94,7 +94,8 @@ def _create_font_blob(font: FontData, font_dir: Path) -> bytearray:
     # Append specific fonts and fill Index Table
     offset = len(blob)
     for font_num, file_path in sorted(num_fonts):
-        data = _font_blob_from_file(file_path)
+        # Looks like pyright bug below
+        data = _font_blob_from_file(file_path)  # type: ignore [Argument of type "int" cannot be assigned to parameter "json_file"]
 
         # Update index table
         struct.pack_into("HH", blob, index_table_pos, font_num, offset)
