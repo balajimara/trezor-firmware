@@ -133,7 +133,7 @@ def test_change_language_errors(client: Client):
             device.change_language(
                 client,
                 language_data=translations.blob_from_dict(
-                    data, file_dir=FONTS, model=client.features.model or ""
+                    data, font_dir=FONTS, model=client.features.model or ""
                 ),
             )
         assert client.features.language == "en-US"
@@ -148,7 +148,7 @@ def test_change_language_errors(client: Client):
             device.change_language(
                 client,
                 language_data=translations.blob_from_dict(
-                    data, file_dir=FONTS, model=client.features.model or ""
+                    data, font_dir=FONTS, model=client.features.model or ""
                 ),
             )
         assert client.features.language == "en-US"
