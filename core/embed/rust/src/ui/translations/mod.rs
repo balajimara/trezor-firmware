@@ -282,6 +282,10 @@ fn get_glyph_data(char_code: u16, font_offset: u16, font_len: u16) -> Option<Off
 /// Returning the absolute offset of the glyph within the translations data -
 /// together with its length.
 fn get_glyph_font_data(char_code: u16, font_id: u16) -> Option<OffsetLen> {
+    if !are_there_translations() {
+        return None;
+    }
+
     if let Some(font_offset) = get_font_offset(font_id) {
         if let Some(glyph_data) = get_glyph_data(char_code, font_offset.offset, font_offset.len) {
             let font_start_offset = unwrap!(TranslationsHeader::from_flash()).font_start_offset();
