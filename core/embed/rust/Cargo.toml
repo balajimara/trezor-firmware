@@ -32,6 +32,7 @@ rgb_led = []
 backlight = []
 usb = []
 optiga = []
+translations = []
 test = [
     "button",
     "cc",
@@ -44,6 +45,7 @@ test = [
     "touch",
     "backlight",
     "optiga",
+    "translations",
 ]
 
 [lib]

@@ -20,7 +20,9 @@
 #include "fonts.h"
 #include <stdbool.h>
 #include <stdio.h>
+#ifdef TRANSLATIONS
 #include "librust_fonts.h"
+#endif
 
 // TODO: make it return uint32_t (needs logic to assemble at most 4 bytes
 // together)
@@ -140,10 +142,10 @@ const uint8_t *font_get_glyph(int font, uint8_t c) {
   bool is_printable = c_2bytes != 0x7F;
   if (!c_2bytes) return 0;
 
+#ifdef TRANSLATIONS
   // found UTF8 character
   // it is not hardcoded in firmware fonts, it must be extracted from the
   // embedded blob
-  // TODO: this should not happen in bootloader - how to defend against it?
   if (c_2bytes > 0xFF) {
     PointerData glyph_data = get_utf8_glyph(c_2bytes, font);
     if (glyph_data.ptr != NULL) {
@@ -152,6 +154,7 @@ const uint8_t *font_get_glyph(int font, uint8_t c) {
       is_printable = false;
     }
   }
+#endif
 
   // printable ASCII character
   if (is_printable && c_2bytes >= ' ' && c_2bytes <= 126) {

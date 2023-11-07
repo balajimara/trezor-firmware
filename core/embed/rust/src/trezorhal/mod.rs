@@ -14,7 +14,7 @@ pub mod random;
 pub mod rgb_led;
 pub mod slip39;
 pub mod storage;
-#[cfg(feature = "micropython")]
+#[cfg(feature = "translations")]
 pub mod translations;
 pub mod usb;
 pub mod uzlib;
