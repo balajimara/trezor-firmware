@@ -97,7 +97,7 @@ SECTIONS {
     *(.fb2*);
     . = ALIGN(4);
   } >SRAM5
-  
+
   .boot_args : ALIGN(8) {
     *(.boot_command*);
     . = ALIGN(8);

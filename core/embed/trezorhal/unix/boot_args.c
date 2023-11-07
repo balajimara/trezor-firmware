@@ -3,7 +3,7 @@
 #include <common.h>
 #include <string.h>
 
-// The 'g_boot_command' variable stores the 'command' for the next
+// The 'g_boot_command_shadow' variable stores the 'command' for the next
 // reboot/jumping to the bootloadeer. It may be one of the
 // 'BOOT_COMMAND_xxx' values defined in the enumeration, or it could
 // be any other value that should be treated as a non-special action,

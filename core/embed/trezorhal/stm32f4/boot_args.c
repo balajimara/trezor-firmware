@@ -5,7 +5,7 @@
 
 // The 'g_boot_command_shadow' shadows a real boot command passed
 // to the bootloader.
-// 1. In the bootloader, it's value is set in the startup code.
+// 1. In the bootloader, its value is set in the startup code.
 // 2. In the firmware it holds command for the next boot and it is used
 //    when svc_reboot_to_bootloader() is called
 boot_command_t g_boot_command_shadow;
