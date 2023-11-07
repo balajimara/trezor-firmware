@@ -152,15 +152,16 @@ def _raw_client(request: pytest.FixtureRequest) -> Client:
 
 
 def _set_language(client: Client, lang: str) -> Client:
+    model = client.features.model or ""
     if lang == "en":
         with client:
             change_language(client, language_data=b"")
     elif lang == "cs":
         with client, open(CS_JSON, "r") as f:
-            change_language(client, language_data=translations.blob_from_file(f))
+            change_language(client, language_data=translations.blob_from_file(f, model))
     elif lang == "fr":
         with client, open(FR_JSON, "r") as f:
-            change_language(client, language_data=translations.blob_from_file(f))
+            change_language(client, language_data=translations.blob_from_file(f, model))
     else:
         raise RuntimeError(f"Unknown language: {lang}")
 
