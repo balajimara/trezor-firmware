@@ -265,7 +265,7 @@ class InputFlowSignMessageInfo(InputFlowBase):
         self.debug.click(buttons.CORNER_BUTTON, wait=True)
         self.debug.click(buttons.CORNER_BUTTON, wait=True)
         self.debug.press_no(wait=True)
-        self.debug.synchronize_at("mismatch")
+        self.debug.synchronize_at("IconDialog")
         # address mismatch?
         self.debug.press_no()
         yield
