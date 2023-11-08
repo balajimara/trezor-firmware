@@ -778,7 +778,7 @@ if BOOTLOADER_QA:
     VENDORHEADER = 'embed/vendorheader/vendorheader_qa_DO_NOT_SIGN_signed_dev.bin'
     BOOTLOADER_SUFFIX = MODEL_IDENTIFIER + '_qa'
 elif PRODUCTION:
-    VENDORHEADER = 'embed/vendorheader/vendorheader_satoshilabs_signed_prod.bin'
+    VENDORHEADER = 'embed/vendorheader/vendorheader_unsafe_signed_prod.bin'
     BOOTLOADER_SUFFIX = MODEL_IDENTIFIER
 else:
     VENDORHEADER = 'embed/vendorheader/vendorheader_unsafe_signed_prod.bin'
