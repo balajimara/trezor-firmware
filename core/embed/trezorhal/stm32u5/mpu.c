@@ -82,7 +82,7 @@ static inline uint32_t mpu_permission_lookup(bool write, bool unpriv) {
     uint32_t _ap = mpu_permission_lookup(_write, _unpriv);   \
     uint32_t _xn = mpu_region_lookup[_type].xn;              \
     MPU->RBAR = _start | _sh | _ap | _xn;                    \
-    uint32_t _limit = (_start + (size) - 1) & (~0x1F);       \
+    uint32_t _limit = (_start + (size)-1) & (~0x1F);         \
     uint32_t _attr = mpu_region_lookup[_type].attr << 1;     \
     uint32_t _enable = LL_MPU_REGION_ENABLE;                 \
     MPU->RLAR = _limit | _attr | _enable;                    \
@@ -136,7 +136,7 @@ void mpu_config_boardloader() {
   SET_REGION( 4, SRAM2_BASE_S + 0x100,     SIZE_1728K - 0x100, SRAM,        YES,   YES ); // SRAM2/3/5 + stack guard 
   SET_REGION( 5, GFXMMU_BUFFERS_S,         SIZE_16M,           SRAM,        YES,   YES ); // Frame buffer 
   SET_REGION( 6, PERIPH_BASE_S,            SIZE_256M,          PERIPHERAL,  YES,   YES ); // Peripherals
-  SET_REGION( 7, FLASH_BASE_NS,            SIZE_4M,            FLASH_DATA,  YES,   YES ); // 
+  SET_REGION( 7, FLASH_BASE_NS,            SIZE_4M,            FLASH_DATA,  YES,   YES ); //
   // clang-format on
   HAL_MPU_Enable(LL_MPU_CTRL_HARDFAULT_NMI);
 }
@@ -175,6 +175,4 @@ void mpu_config_firmware() {
   HAL_MPU_Enable(LL_MPU_CTRL_HARDFAULT_NMI);
 }
 
-void mpu_config_off(void) {
-  HAL_MPU_Disable();
-}
+void mpu_config_off(void) { HAL_MPU_Disable(); }
