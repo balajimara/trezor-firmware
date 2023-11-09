@@ -159,7 +159,7 @@ int main(void) {
     uint8_t fingerprint[32] = {0};
     int signed_firmware = signatures_match(hdr, fingerprint);
     if (SIG_OK != signed_firmware) {
-      show_unofficial_warning(fingerprint);
+      // show_unofficial_warning(fingerprint);
     }
 #if !PRODUCTION && !BOOTLOADER_QA && !DEBUG_T1_SIGNATURES
     // try to avoid bricking board SWD debug by accident

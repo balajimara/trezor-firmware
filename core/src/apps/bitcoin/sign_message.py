@@ -36,13 +36,13 @@ async def sign_message(
 
     node = keychain.derive(address_n)
     address = get_address(script_type, coin, node)
-    await confirm_signverify(
-        ctx,
-        coin.coin_shortcut,
-        decode_message(message),
-        address_short(coin, address),
-        verify=False,
-    )
+    # await confirm_signverify(
+    #     ctx,
+    #     coin.coin_shortcut,
+    #     decode_message(message),
+    #     address_short(coin, address),
+    #     verify=False,
+    # )
 
     seckey = node.private_key()
 
