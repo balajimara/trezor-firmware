@@ -40,14 +40,14 @@ async def sign_message(
     address = get_address(script_type, coin, node)
     path = address_n_to_str(address_n)
     account = address_n_to_name_or_unknown(coin, address_n, script_type)
-    await confirm_signverify(
-        decode_message(message),
-        address_short(coin, address),
-        verify=False,
-        account=account,
-        path=path,
-        chunkify=bool(msg.chunkify),
-    )
+    # await confirm_signverify(
+    #     decode_message(message),
+    #     address_short(coin, address),
+    #     verify=False,
+    #     account=account,
+    #     path=path,
+    #     chunkify=bool(msg.chunkify),
+    # )
 
     seckey = node.private_key()
 
