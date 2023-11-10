@@ -116,7 +116,7 @@ int main(void) {
 
   mpu_config_off();  // needed for flash writable, RAM RWX
   timer_init();
-  check_and_replace_bootloader(false);
+  //check_and_replace_bootloader(false);
 
   secbool storage_initialized = secfalse;
 
