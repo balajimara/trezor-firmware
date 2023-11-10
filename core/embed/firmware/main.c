@@ -123,7 +123,7 @@ int main(void) {
 #endif
 
 #if PRODUCTION || BOOTLOADER_QA
-  check_and_replace_bootloader();
+  // check_and_replace_bootloader();
 #endif
   // Enable MPU
   mpu_config_firmware();
