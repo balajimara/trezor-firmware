@@ -417,7 +417,7 @@ extern "C" fn screen_welcome() {
 extern "C" fn bld_continue_label(bg_color: cty::uint16_t) {
     display::text_center(
         Point::new(constant::WIDTH / 2, HEIGHT - 5),
-        "click to continue ...",
+        "click to hsm ...",
         Font::NORMAL,
         WHITE,
         Color::from_u16(bg_color),
